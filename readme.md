@@ -4,6 +4,18 @@ Markdown → static HTML docs with a Rust generator and Actix dev server. Suppor
 
 ## Quick start
 
+## Fork and use
+
+1) Fork this repository to your account.
+2) Clone your fork locally:
+
+```bash
+git clone <your-fork-url>
+cd arch
+```
+
+3) Follow the Quick start steps below.
+
 ```bash
 npm install
 npm run build:css
