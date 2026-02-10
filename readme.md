@@ -1,4 +1,4 @@
-# Rust Docs Generator (Actix + Tailwind)
+# Simple way to create infra architecture documentation
 
 Markdown → static HTML docs with a Rust generator and Actix dev server. Supports multi‑language pages, split panels, and architecture tabs (Arch/JSON/Text).
 
@@ -10,7 +10,7 @@ Markdown → static HTML docs with a Rust generator and Actix dev server. Suppor
 2) Clone your fork locally:
 
 ```bash
-git clone <your-fork-url>
+git clone https://github.com/srotas-space/arch.git
 cd arch
 ```
 
