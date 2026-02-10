@@ -116,6 +116,58 @@ server {
 - `welcome.md` — used as the homepage (`/en/`, `/hi/`).
 - `template.md` — optional but recommended for ordered includes.
 
+## Rust + Actix setup (macOS / Ubuntu / Windows)
+
+### macOS
+
+```bash
+brew install rust
+```
+
+### Ubuntu
+
+```bash
+sudo apt update
+sudo apt install -y build-essential curl
+curl https://sh.rustup.rs -sSf | sh
+source "$HOME/.cargo/env"
+```
+
+### Windows
+
+1) Install Rust via rustup: https://rustup.rs  
+2) Restart your terminal, then verify:
+
+```bash
+rustc --version
+cargo --version
+```
+
+## Node.js setup (macOS / Ubuntu / Windows)
+
+### macOS
+
+```bash
+brew install node
+```
+
+### Ubuntu
+
+```bash
+sudo apt update
+sudo apt install -y nodejs npm
+```
+
+### Windows
+
+1) Install Node.js (LTS): https://nodejs.org  
+2) Restart your terminal, then verify:
+
+```bash
+node --version
+npm --version
+```
+
 ## Writing pages
 
 Each page should follow this structure to populate the split panels and tabs:
