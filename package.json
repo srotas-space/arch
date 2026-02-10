@@ -1,0 +1,11 @@
+{
+  "name": "docsgen-ui",
+  "private": true,
+  "devDependencies": {
+    "tailwindcss": "^3.4.13"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -i assets/input.css -o assets/app.css --minify",
+    "dev:css": "tailwindcss -i assets/input.css -o assets/app.css --watch"
+  }
+}

@@ -1,0 +1,435 @@
+use std::fs;
+use std::path::{Path, PathBuf};
+
+use actix_files::Files;
+use actix_web::http::header::LOCATION;
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use anyhow::{anyhow, Context, Result};
+use clap::{Parser, Subcommand};
+use pulldown_cmark::{html, Options, Parser as MdParser};
+use serde::Serialize;
+use tera::{Context as TeraContext, Tera};
+use walkdir::WalkDir;
+
+#[derive(Parser)]
+#[command(name = "docsgen", version, about = "Rust docs generator with Actix dev server")]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Build(BuildArgs),
+    Serve(ServeArgs),
+}
+
+#[derive(Parser, Clone)]
+struct BuildArgs {
+    #[arg(long, default_value = "docs")]
+    docs_dir: PathBuf,
+
+    #[arg(long, default_value = "public")]
+    out_dir: PathBuf,
+
+    #[arg(long, default_value = "assets")]
+    assets_dir: PathBuf,
+
+    #[arg(long, default_value = "docsgen/templates")]
+    templates_dir: PathBuf,
+
+    #[arg(long, default_value = "Srotas Space Docs")]
+    site_title: String,
+}
+
+#[derive(Parser, Clone)]
+struct ServeArgs {
+    #[arg(long, default_value = "127.0.0.1")]
+    host: String,
+
+    #[arg(long, default_value_t = 8088)]
+    port: u16,
+
+    #[command(flatten)]
+    build: BuildArgs,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct PageMeta {
+    title: String,
+    url: String,
+    rel_slug: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct LangMeta {
+    code: String,
+    pages: Vec<PageMeta>,
+}
+
+#[derive(Clone, Debug)]
+struct SiteMeta {
+    langs: Vec<LangMeta>,
+    default_lang: String,
+}
+
+#[actix_web::main]
+async fn main() -> Result<()> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Commands::Build(args) => {
+            build_site(&args).context("build failed")?;
+        }
+        Commands::Serve(args) => {
+            let site = build_site(&args.build).context("build failed")?;
+            serve_site(args, site).await?;
+        }
+    }
+
+    Ok(())
+}
+
+fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
+    if !args.docs_dir.exists() {
+        return Err(anyhow!("docs dir not found: {}", args.docs_dir.display()));
+    }
+
+    let templates_glob = format!("{}/**/*.html", args.templates_dir.display());
+    let tera = Tera::new(&templates_glob)
+        .with_context(|| format!("failed to load templates: {templates_glob}"))?;
+
+    prepare_output_dir(&args.out_dir)?;
+
+    let site = collect_site_meta(&args.docs_dir)?;
+    for lang in &site.langs {
+        for page in &lang.pages {
+            let md_path = args
+                .docs_dir
+                .join(&lang.code)
+                .join(format!("{}.md", page.rel_slug));
+            if !md_path.exists() {
+                continue;
+            }
+            let markdown = fs::read_to_string(&md_path)
+                .with_context(|| format!("failed to read {}", md_path.display()))?;
+            let (desc_md, arch_md, json_md, text_md) = split_sections(&markdown);
+            let content_html = markdown_to_html(&markdown);
+            let description_html = markdown_to_html(&desc_md);
+            let architecture_html = markdown_to_html(&arch_md);
+            let architecture_json_html = markdown_to_html(&json_md);
+            let architecture_text_html = markdown_to_html(&text_md);
+
+            let mut ctx = TeraContext::new();
+            ctx.insert("site_title", &args.site_title);
+            ctx.insert("page_title", &page.title);
+            ctx.insert("lang", &lang.code);
+            ctx.insert("content_html", &content_html);
+            ctx.insert("description_html", &description_html);
+            ctx.insert("architecture_html", &architecture_html);
+            ctx.insert("architecture_json_html", &architecture_json_html);
+            ctx.insert("architecture_text_html", &architecture_text_html);
+            ctx.insert("nav_pages", &lang.pages);
+            ctx.insert("current_url", &page.url);
+            ctx.insert("langs", &site.langs);
+            ctx.insert("dev_reload", &false);
+
+            let rendered = tera
+                .render("page.html", &ctx)
+                .context("failed to render template")?;
+
+            let out_path = output_path_for(&args.out_dir, &lang.code, &page.rel_slug);
+            if let Some(parent) = out_path.parent() {
+                fs::create_dir_all(parent)
+                    .with_context(|| format!("failed to create {}", parent.display()))?;
+            }
+            fs::write(&out_path, rendered)
+                .with_context(|| format!("failed to write {}", out_path.display()))?;
+        }
+    }
+
+    copy_assets(&args.assets_dir, &args.out_dir.join("assets"))?;
+
+    let marker = args.out_dir.join(".docsgen");
+    fs::write(marker, "managed by docsgen")?;
+
+    Ok(site)
+}
+
+async fn serve_site(args: ServeArgs, site: SiteMeta) -> Result<()> {
+    let out_dir = args.build.out_dir.clone();
+    let default_lang = site.default_lang.clone();
+
+    let bind_addr = format!("{}:{}", args.host, args.port);
+    println!("Serving on http://{bind_addr}");
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(default_lang.clone()))
+            .route("/", web::get().to(root_redirect))
+            .route("/{lang}", web::get().to(lang_redirect))
+            .service(Files::new("/", &out_dir).index_file("index.html"))
+    })
+    .bind(bind_addr)?
+    .run()
+    .await?;
+
+    Ok(())
+}
+
+async fn root_redirect(default_lang: web::Data<String>) -> impl Responder {
+    HttpResponse::Found()
+        .append_header((LOCATION, format!("/{}/", default_lang.get_ref())))
+        .finish()
+}
+
+async fn lang_redirect(path: web::Path<String>) -> impl Responder {
+    let lang = path.into_inner();
+    HttpResponse::Found()
+        .append_header((LOCATION, format!("/{}/", lang)))
+        .finish()
+}
+
+fn prepare_output_dir(out_dir: &Path) -> Result<()> {
+    let marker = out_dir.join(".docsgen");
+    if out_dir.exists() && marker.exists() {
+        fs::remove_dir_all(out_dir)
+            .with_context(|| format!("failed to clean {}", out_dir.display()))?;
+    }
+    fs::create_dir_all(out_dir)
+        .with_context(|| format!("failed to create {}", out_dir.display()))?;
+    Ok(())
+}
+
+fn collect_site_meta(docs_dir: &Path) -> Result<SiteMeta> {
+    let mut langs = Vec::new();
+    for entry in fs::read_dir(docs_dir)? {
+        let entry = entry?;
+        if !entry.file_type()?.is_dir() {
+            continue;
+        }
+        let lang_code = entry.file_name().to_string_lossy().to_string();
+        let pages = collect_pages_for_lang(&entry.path(), &lang_code)?;
+        if !pages.is_empty() {
+            langs.push(LangMeta { code: lang_code, pages });
+        }
+    }
+
+    if langs.is_empty() {
+        return Err(anyhow!("no languages found under {}", docs_dir.display()));
+    }
+
+    langs.sort_by(|a, b| a.code.cmp(&b.code));
+    let default_lang = langs.first().unwrap().code.clone();
+
+    Ok(SiteMeta { langs, default_lang })
+}
+
+fn collect_pages_for_lang(lang_dir: &Path, lang_code: &str) -> Result<Vec<PageMeta>> {
+    let mut pages = Vec::new();
+    for entry in WalkDir::new(lang_dir)
+        .follow_links(false)
+        .into_iter()
+        .filter_map(Result::ok)
+    {
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        if entry.path().extension().and_then(|s| s.to_str()) != Some("md") {
+            continue;
+        }
+        let rel_path = entry.path().strip_prefix(lang_dir)?;
+        let rel_slug = path_without_extension(rel_path);
+        let markdown = fs::read_to_string(entry.path())
+            .with_context(|| format!("failed to read {}", entry.path().display()))?;
+        let title = extract_title(&markdown)
+            .unwrap_or_else(|| title_from_slug(&rel_slug));
+        let url = url_for(lang_code, &rel_slug);
+
+        pages.push(PageMeta { title, url, rel_slug });
+    }
+
+    pages.sort_by(|a, b| a.rel_slug.cmp(&b.rel_slug));
+    Ok(pages)
+}
+
+fn path_without_extension(path: &Path) -> String {
+    let mut rel = path.to_path_buf();
+    rel.set_extension("");
+    rel.to_string_lossy().replace('\\', "/")
+}
+
+fn url_for(lang: &str, rel_slug: &str) -> String {
+    if rel_slug == "index" {
+        format!("/{lang}/")
+    } else {
+        format!("/{lang}/{rel_slug}")
+    }
+}
+
+fn output_path_for(out_dir: &Path, lang: &str, rel_slug: &str) -> PathBuf {
+    if rel_slug == "index" {
+        out_dir.join(lang).join("index.html")
+    } else {
+        out_dir.join(lang).join(rel_slug).join("index.html")
+    }
+}
+
+fn extract_title(md: &str) -> Option<String> {
+    for line in md.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("# ") {
+            return Some(trimmed.trim_start_matches("# ").trim().to_string());
+        }
+    }
+    None
+}
+
+fn title_from_slug(slug: &str) -> String {
+    let last = slug.rsplit('/').next().unwrap_or(slug);
+    let mut words = Vec::new();
+    for part in last.split(|c| c == '-' || c == '_') {
+        if part.is_empty() {
+            continue;
+        }
+        let mut chars = part.chars();
+        let title = match chars.next() {
+            Some(first) => format!("{}{}", first.to_ascii_uppercase(), chars.as_str()),
+            None => continue,
+        };
+        words.push(title);
+    }
+    if words.is_empty() {
+        "Untitled".to_string()
+    } else {
+        words.join(" ")
+    }
+}
+
+fn markdown_to_html(md: &str) -> String {
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_TABLES);
+    options.insert(Options::ENABLE_FOOTNOTES);
+    options.insert(Options::ENABLE_STRIKETHROUGH);
+    options.insert(Options::ENABLE_TASKLISTS);
+    options.insert(Options::ENABLE_SMART_PUNCTUATION);
+
+    let parser = MdParser::new_ext(md, options);
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
+    html_output
+        .replace("<h2>Description</h2>", "<h2 id=\"description\">Description</h2>")
+        .replace("<h2>Architecture</h2>", "<h2 id=\"architecture\">Architecture</h2>")
+}
+
+fn split_sections(md: &str) -> (String, String, String, String) {
+    let mut description = String::new();
+    let mut architecture = String::new();
+    let mut architecture_json = String::new();
+    let mut architecture_text = String::new();
+
+    let mut current: Option<&str> = None;
+    let mut arch_mode: Option<&str> = None;
+    for line in md.lines() {
+        let trimmed = line.trim();
+        if trimmed.eq_ignore_ascii_case("## Description") {
+            current = Some("description");
+            arch_mode = None;
+            continue;
+        }
+        if trimmed.eq_ignore_ascii_case("## Architecture") {
+            current = Some("architecture");
+            arch_mode = None;
+            continue;
+        }
+        if trimmed.eq_ignore_ascii_case("### Arch") {
+            if current == Some("architecture") {
+                arch_mode = Some("arch");
+                continue;
+            }
+        }
+        if trimmed.eq_ignore_ascii_case("### JSON") {
+            if current == Some("architecture") {
+                arch_mode = Some("json");
+                continue;
+            }
+        }
+        if trimmed.eq_ignore_ascii_case("### Text") {
+            if current == Some("architecture") {
+                arch_mode = Some("text");
+                continue;
+            }
+        }
+        if trimmed.starts_with("## ") {
+            current = None;
+            arch_mode = None;
+        }
+
+        match current {
+            Some("description") => {
+                description.push_str(line);
+                description.push('\n');
+            }
+            Some("architecture") => {
+                match arch_mode {
+                    Some("json") => {
+                        architecture_json.push_str(line);
+                        architecture_json.push('\n');
+                    }
+                    Some("text") => {
+                        architecture_text.push_str(line);
+                        architecture_text.push('\n');
+                    }
+                    _ => {
+                        architecture.push_str(line);
+                        architecture.push('\n');
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if description.trim().is_empty()
+        && architecture.trim().is_empty()
+        && architecture_json.trim().is_empty()
+        && architecture_text.trim().is_empty()
+    {
+        return (md.to_string(), String::new(), String::new(), String::new());
+    }
+
+    if description.trim().is_empty() {
+        description = md.to_string();
+    }
+
+    (description, architecture, architecture_json, architecture_text)
+}
+
+fn copy_assets(src_dir: &Path, dest_dir: &Path) -> Result<()> {
+    if !src_dir.exists() {
+        return Ok(());
+    }
+    fs::create_dir_all(dest_dir)
+        .with_context(|| format!("failed to create {}", dest_dir.display()))?;
+
+    for entry in WalkDir::new(src_dir)
+        .follow_links(false)
+        .into_iter()
+        .filter_map(Result::ok)
+    {
+        let path = entry.path();
+        let rel = path.strip_prefix(src_dir)?;
+        let target = dest_dir.join(rel);
+        if entry.file_type().is_dir() {
+            fs::create_dir_all(&target)
+                .with_context(|| format!("failed to create {}", target.display()))?;
+        } else {
+            if let Some(parent) = target.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            fs::copy(path, &target)
+                .with_context(|| format!("failed to copy {}", path.display()))?;
+        }
+    }
+    Ok(())
+}

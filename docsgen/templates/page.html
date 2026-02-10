@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }} · {{ site_title }}</title>
+    <link rel="stylesheet" href="/assets/app.css">
+  </head>
+  <body class="bg-slate-100 text-slate-900">
+    <div class="relative min-h-screen overflow-hidden">
+      <div class="relative flex w-full flex-col gap-0 px-0 py-0 lg:flex-row">
+        <aside class="sidebar">
+          <a class="sidebar-brand" href="/">
+            <div class="brand-mark">◎</div>
+            <div>
+              <div class="brand-title">{{ site_title }}</div>
+              <div class="brand-subtitle">Architecture documentation</div>
+            </div>
+          </a>
+
+          <div class="sidebar-nav">
+            {% for page in nav_pages %}
+              <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}">
+                {{ page.title }}
+              </a>
+            {% endfor %}
+          </div>
+
+          <div class="sidebar-section">
+            <p class="sidebar-section-title">Languages</p>
+            <div class="sidebar-pills">
+              {% for lang_item in langs %}
+                <a class="lang-pill {% if lang_item.code == lang %}lang-pill-active{% endif %}" href="/{{ lang_item.code }}/">
+                  {{ lang_item.code | upper }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <div class="main-top">
+            <div class="main-title">
+              <h2>{{ page_title }} ({{ lang | upper }})</h2>
+            </div>
+          </div>
+
+          <div class="doc-split">
+            <section class="doc-panel">
+              <div id="description" class="markdown panel-body">
+                {{ description_html | safe }}
+              </div>
+            </section>
+            <section class="doc-panel">
+              <div class="panel-tabs">
+                <button class="panel-tab panel-tab-active" data-arch-tab="arch" type="button">Arch</button>
+                <button class="panel-tab" data-arch-tab="json" type="button">JSON</button>
+                <button class="panel-tab" data-arch-tab="text" type="button">Text</button>
+              </div>
+              <div class="panel-pane panel-pane-active" data-arch-pane="arch">
+                {{ architecture_html | safe }}
+              </div>
+              <div class="panel-pane" data-arch-pane="json">
+                {{ architecture_json_html | safe }}
+              </div>
+              <div class="panel-pane" data-arch-pane="text">
+                {{ architecture_text_html | safe }}
+              </div>
+            </section>
+          </div>
+
+          <footer class="main-footer">
+            <span>Arch by Srotas Space</span>
+            <span>Static export ready</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+    <script>
+      const tabButtons = document.querySelectorAll("[data-arch-tab]");
+      const tabPanes = document.querySelectorAll("[data-arch-pane]");
+      const setArchTab = (key) => {
+        tabButtons.forEach((btn) => btn.classList.toggle("panel-tab-active", btn.dataset.archTab === key));
+        tabPanes.forEach((pane) => pane.classList.toggle("panel-pane-active", pane.dataset.archPane === key));
+      };
+      tabButtons.forEach((btn) => {
+        btn.addEventListener("click", () => setArchTab(btn.dataset.archTab));
+      });
+      setArchTab("arch");
+    </script>
+  </body>
+</html>

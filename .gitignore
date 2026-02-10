@@ -1,0 +1,9 @@
+/node_modules/
+/public/
+/docsgen/target/
+/docsgen/.cargo/
+/docsgen/Cargo.lock
+/.DS_Store
+.DS_Store
+*.log
+/tmp/
