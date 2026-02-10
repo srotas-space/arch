@@ -27,6 +27,7 @@
 
   .sidebar {
     @apply w-full bg-slate-900 px-5 py-6 text-slate-100 lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-60 lg:overflow-y-auto;
+    background-image: linear-gradient(160deg, #5b1ae6 0%, #7f39f5 38%, #ff8a00 100%);
   }
 
   .sidebar-brand {
@@ -34,7 +35,7 @@
   }
 
   .brand-mark {
-    @apply flex h-10 w-10 items-center justify-center rounded-lg border border-slate-700 text-lg text-slate-200;
+    @apply flex h-10 w-10 items-center justify-center rounded-lg border border-white/30 text-lg text-white/90;
   }
 
   .brand-title {
@@ -42,7 +43,7 @@
   }
 
   .brand-subtitle {
-    @apply text-xs text-slate-400;
+    @apply text-xs text-white/80;
   }
 
   .sidebar-nav {
@@ -54,7 +55,7 @@
   }
 
   .sidebar-section-title {
-    @apply text-[10px] uppercase tracking-[0.28em] text-slate-400;
+    @apply text-[10px] uppercase tracking-[0.28em] text-white/80;
   }
 
   .sidebar-pills {
@@ -71,6 +72,10 @@
 
   .main-title h2 {
     @apply text-3xl font-semibold text-slate-900;
+    background: linear-gradient(90deg, #5b1ae6 0%, #7f39f5 45%, #ff8a00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .main-tabs {
@@ -118,7 +123,8 @@
   }
 
   .panel-tab-active {
-    @apply bg-slate-900 text-white;
+    @apply text-white;
+    background-image: linear-gradient(90deg, #5b1ae6 0%, #7f39f5 45%, #ff8a00 100%);
   }
 
   .panel-pane {
@@ -130,23 +136,24 @@
   }
 
   .nav-link {
-    @apply flex items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium text-slate-300 transition;
+    @apply flex items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium text-white/85 transition;
   }
 
   .nav-link:hover {
-    @apply bg-slate-800 text-white;
+    @apply bg-white/15 text-white;
   }
 
   .nav-link-active {
-    @apply bg-slate-800 text-white;
+    @apply text-white;
+    background-image: linear-gradient(90deg, rgba(91, 26, 230, 0.9) 0%, rgba(127, 57, 245, 0.9) 55%, rgba(255, 138, 0, 0.9) 100%);
   }
 
   .lang-pill {
-    @apply rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-[10px] tracking-[0.24em] text-slate-300 uppercase transition;
+    @apply rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[10px] tracking-[0.24em] text-white/90 uppercase transition;
   }
 
   .lang-pill:hover {
-    @apply border-slate-500 text-white;
+    @apply border-white/60 text-white;
   }
 
   .lang-pill-active {
@@ -244,23 +251,24 @@
   }
 
   .env-tag {
-    @apply rounded-full border border-slate-200 bg-slate-900 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-white whitespace-nowrap leading-none shrink-0;
+    @apply rounded-full border border-slate-200 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-white whitespace-nowrap leading-none shrink-0;
+    background-image: linear-gradient(90deg, #5b1ae6 0%, #7f39f5 45%, #ff8a00 100%);
   }
 
   .env-tag-test {
-    @apply border-slate-900 text-white bg-slate-900;
+    @apply border-transparent text-white;
   }
 
   .env-tag-dev {
-    @apply border-slate-800 text-white bg-slate-800;
+    @apply border-transparent text-white;
   }
 
   .env-tag-stage {
-    @apply border-slate-700 text-white bg-slate-700;
+    @apply border-transparent text-white;
   }
 
   .env-tag-prod {
-    @apply border-slate-900 text-white bg-slate-900;
+    @apply border-transparent text-white;
   }
 
   .env-costs {
@@ -268,7 +276,8 @@
   }
 
   .cost-chip {
-    @apply rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] text-slate-700;
+    @apply rounded-full border border-transparent px-3 py-1 text-[11px] text-white;
+    background-image: linear-gradient(90deg, rgba(91, 26, 230, 0.9) 0%, rgba(127, 57, 245, 0.9) 55%, rgba(255, 138, 0, 0.9) 100%);
   }
 
   .stack-grid {
