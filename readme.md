@@ -111,6 +111,11 @@ server {
 - `assets/app.css` — compiled CSS.
 - `public/` — generated static site.
 
+## Mandatory files (per language)
+
+- `welcome.md` — used as the homepage (`/en/`, `/hi/`).
+- `template.md` — optional but recommended for ordered includes.
+
 ## Writing pages
 
 Each page should follow this structure to populate the split panels and tabs:
@@ -135,6 +140,25 @@ Plain explanation.
 ```
 
 If a page omits these headings, the content will still render; the architecture tabs may be empty.
+
+## Include pages in a specific order (Markdown-only)
+
+You can compose a page from multiple files using `@include:` directives. This lets you control order without changing Rust.
+
+Example `docs/en/template.md`:
+
+```md
+# Architecture Overview
+
+@include: 01-intro.md
+@include: 02-architecture.md
+@include: 03-pricing.md
+@include: 04-mine.md
+```
+
+All `@include:` paths are relative to the language folder (e.g., `docs/en/`).
+
+`welcome.md` is treated as the default page for that language and will be served at `/en/`. `template.md` remains a normal page.
 
 ## Testing / QA
 
@@ -163,6 +187,14 @@ If a page omits these headings, the content will still render; the architecture 
 - Start dev server:
   ```bash
   cargo run --manifest-path docsgen/Cargo.toml -- serve
+  ```
+- Start dev server with watch (auto-build on .md changes):
+  ```bash
+  cargo run --manifest-path docsgen/Cargo.toml -- serve --watch
+  ```
+- Auto-build on Markdown changes (no server restart):
+  ```bash
+  ./scripts/watch-docs.sh
   ```
 - Build CSS in watch mode (optional):
   ```bash

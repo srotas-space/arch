@@ -1,4 +1,4 @@
-# Getting Started
+# Welcome
 
 This stack is built for writing clean API docs without a backend.
 

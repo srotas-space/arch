@@ -1,11 +1,14 @@
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::mpsc;
+use std::time::Duration;
 
 use actix_files::Files;
 use actix_web::http::header::LOCATION;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use anyhow::{anyhow, Context, Result};
 use clap::{Parser, Subcommand};
+use notify::{RecursiveMode, Result as NotifyResult, Watcher};
 use pulldown_cmark::{html, Options, Parser as MdParser};
 use serde::Serialize;
 use tera::{Context as TeraContext, Tera};
@@ -38,7 +41,7 @@ struct BuildArgs {
     #[arg(long, default_value = "docsgen/templates")]
     templates_dir: PathBuf,
 
-    #[arg(long, default_value = "Srotas Space Docs")]
+    #[arg(long, default_value = "Srotas Space")]
     site_title: String,
 }
 
@@ -50,6 +53,9 @@ struct ServeArgs {
     #[arg(long, default_value_t = 8088)]
     port: u16,
 
+    #[arg(long, default_value_t = false)]
+    watch: bool,
+
     #[command(flatten)]
     build: BuildArgs,
 }
@@ -59,6 +65,7 @@ struct PageMeta {
     title: String,
     url: String,
     rel_slug: String,
+    source_rel: String,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -83,6 +90,9 @@ async fn main() -> Result<()> {
         }
         Commands::Serve(args) => {
             let site = build_site(&args.build).context("build failed")?;
+            if args.watch {
+                start_watcher(args.build.clone());
+            }
             serve_site(args, site).await?;
         }
     }
@@ -107,14 +117,16 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
             let md_path = args
                 .docs_dir
                 .join(&lang.code)
-                .join(format!("{}.md", page.rel_slug));
+                .join(&page.source_rel);
             if !md_path.exists() {
                 continue;
             }
             let markdown = fs::read_to_string(&md_path)
                 .with_context(|| format!("failed to read {}", md_path.display()))?;
-            let (desc_md, arch_md, json_md, text_md) = split_sections(&markdown);
-            let content_html = markdown_to_html(&markdown);
+            let expanded = expand_includes(&markdown, md_path.parent().unwrap_or(&args.docs_dir))
+                .with_context(|| format!("failed to expand includes in {}", md_path.display()))?;
+            let (desc_md, arch_md, json_md, text_md) = split_sections(&expanded);
+            let content_html = markdown_to_html(&expanded);
             let description_html = markdown_to_html(&desc_md);
             let architecture_html = markdown_to_html(&arch_md);
             let architecture_json_html = markdown_to_html(&json_md);
@@ -227,6 +239,7 @@ fn collect_site_meta(docs_dir: &Path) -> Result<SiteMeta> {
 
 fn collect_pages_for_lang(lang_dir: &Path, lang_code: &str) -> Result<Vec<PageMeta>> {
     let mut pages = Vec::new();
+    let include_order = load_include_order(lang_dir).unwrap_or_default();
     for entry in WalkDir::new(lang_dir)
         .follow_links(false)
         .into_iter()
@@ -239,17 +252,38 @@ fn collect_pages_for_lang(lang_dir: &Path, lang_code: &str) -> Result<Vec<PageMe
             continue;
         }
         let rel_path = entry.path().strip_prefix(lang_dir)?;
-        let rel_slug = path_without_extension(rel_path);
+        let source_rel = rel_path.to_string_lossy().replace('\\', "/");
+        let mut rel_slug = path_without_extension(rel_path);
+        if rel_slug == "welcome" {
+            rel_slug = "index".to_string();
+        }
         let markdown = fs::read_to_string(entry.path())
             .with_context(|| format!("failed to read {}", entry.path().display()))?;
-        let title = extract_title(&markdown)
+        let expanded = expand_includes(&markdown, lang_dir)
+            .with_context(|| format!("failed to expand includes in {}", entry.path().display()))?;
+        let title = extract_title(&expanded)
             .unwrap_or_else(|| title_from_slug(&rel_slug));
         let url = url_for(lang_code, &rel_slug);
 
-        pages.push(PageMeta { title, url, rel_slug });
+        if source_rel == "template.md" {
+            continue;
+        }
+
+        pages.push(PageMeta {
+            title,
+            url,
+            rel_slug,
+            source_rel,
+        });
     }
 
-    pages.sort_by(|a, b| a.rel_slug.cmp(&b.rel_slug));
+    pages.sort_by(|a, b| {
+        let a_idx = order_index(&include_order, &a.source_rel, &a.rel_slug);
+        let b_idx = order_index(&include_order, &b.source_rel, &b.rel_slug);
+        a_idx
+            .cmp(&b_idx)
+            .then_with(|| a.rel_slug.cmp(&b.rel_slug))
+    });
     Ok(pages)
 }
 
@@ -390,19 +424,112 @@ fn split_sections(md: &str) -> (String, String, String, String) {
         }
     }
 
-    if description.trim().is_empty()
-        && architecture.trim().is_empty()
-        && architecture_json.trim().is_empty()
-        && architecture_text.trim().is_empty()
-    {
+    let has_arch = !architecture.trim().is_empty()
+        || !architecture_json.trim().is_empty()
+        || !architecture_text.trim().is_empty();
+
+    if description.trim().is_empty() && !has_arch {
         return (md.to_string(), String::new(), String::new(), String::new());
     }
 
-    if description.trim().is_empty() {
-        description = md.to_string();
-    }
-
     (description, architecture, architecture_json, architecture_text)
+}
+
+fn start_watcher(args: BuildArgs) {
+    std::thread::spawn(move || {
+        if let Err(err) = watch_and_rebuild(args) {
+            eprintln!("watcher error: {err}");
+        }
+    });
+}
+
+fn watch_and_rebuild(args: BuildArgs) -> NotifyResult<()> {
+    let (tx, rx) = mpsc::channel();
+    let mut watcher = notify::recommended_watcher(tx)?;
+    watcher.watch(&args.docs_dir, RecursiveMode::Recursive)?;
+    watcher.watch(&args.templates_dir, RecursiveMode::Recursive)?;
+
+    let mut pending = false;
+    loop {
+        match rx.recv_timeout(Duration::from_millis(200)) {
+            Ok(_) => pending = true,
+            Err(mpsc::RecvTimeoutError::Timeout) => {
+                if pending {
+                    if let Err(err) = build_site(&args) {
+                        eprintln!("rebuild failed: {err}");
+                    }
+                    pending = false;
+                }
+            }
+            Err(mpsc::RecvTimeoutError::Disconnected) => break,
+        }
+    }
+    Ok(())
+}
+
+fn load_include_order(lang_dir: &Path) -> Result<Vec<String>> {
+    let template = lang_dir.join("template.md");
+    if !template.exists() {
+        return Ok(Vec::new());
+    }
+    let content = fs::read_to_string(&template)?;
+    let mut order = Vec::new();
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if let Some(rest) = trimmed.strip_prefix("@include:") {
+            let rel = rest.trim();
+            if !rel.is_empty() {
+                order.push(rel.replace('\\', "/"));
+            }
+        }
+    }
+    Ok(order)
+}
+
+fn order_index(include_order: &[String], source_rel: &str, rel_slug: &str) -> usize {
+    if rel_slug == "index" {
+        return 0;
+    }
+    if source_rel == "template.md" {
+        return 1;
+    }
+    if let Some(pos) = include_order
+        .iter()
+        .position(|item| item == source_rel)
+    {
+        return pos + 2;
+    }
+    usize::MAX
+}
+
+fn expand_includes(md: &str, base_dir: &Path) -> Result<String> {
+    expand_includes_inner(md, base_dir, 0)
+}
+
+fn expand_includes_inner(md: &str, base_dir: &Path, depth: usize) -> Result<String> {
+    if depth > 5 {
+        return Err(anyhow!("include depth exceeded"));
+    }
+    let mut out = String::new();
+    for line in md.lines() {
+        let trimmed = line.trim();
+        if let Some(rest) = trimmed.strip_prefix("@include:") {
+            let rel = rest.trim();
+            if rel.is_empty() {
+                continue;
+            }
+            let target = base_dir.join(rel);
+            let included = fs::read_to_string(&target)
+                .with_context(|| format!("failed to read include {}", target.display()))?;
+            let expanded = expand_includes_inner(&included, base_dir, depth + 1)?;
+            out.push_str(&expanded);
+            out.push('\n');
+        } else {
+            out.push_str(line);
+            out.push('\n');
+        }
+    }
+    Ok(out)
 }
 
 fn copy_assets(src_dir: &Path, dest_dir: &Path) -> Result<()> {
