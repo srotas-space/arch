@@ -251,6 +251,7 @@ Groups render as collapsible sections in the sidebar.
 - **Styles:** `assets/input.css` (then run `npm run build:css`)
 - **Generator logic:** `docsgen/src/main.rs`
 - **Content:** `docs/<lang>/*.md`
+- **Logo:** replace `assets/logo.png` (recommended 24×24 inside a 40×40 container)
 
 ## Common tasks
 
