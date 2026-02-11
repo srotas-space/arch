@@ -116,6 +116,17 @@ server {
 - `welcome.md` — used as the homepage (`/en/`, `/hi/`).
 - `template.md` — optional but recommended for ordered includes.
 
+## Site settings (Markdown)
+
+Create `docs/site.md` for global settings or `docs/<lang>/site.md` for per‑language overrides.
+
+```md
+title: Srotas Space
+subtitle: Arch doc
+logo: /assets/logo.png
+footer: Arch by Srotas Space
+```
+
 ## Rust + Actix setup (macOS / Ubuntu / Windows)
 
 ### macOS

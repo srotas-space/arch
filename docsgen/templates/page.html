@@ -12,11 +12,17 @@
         <aside class="sidebar">
           <a class="sidebar-brand" href="/">
             <div class="brand-mark">
-              <img src="https://srotas-suite-space.s3.ap-south-1.amazonaws.com/sqrush.png" alt="Srotas Space logo" class="brand-logo">
+              {% if site_logo is defined %}
+                <img src="{{ site_logo }}" alt="Site logo" class="brand-logo">
+              {% else %}
+                <img src="https://srotas-suite-space.s3.ap-south-1.amazonaws.com/sqrush.png" alt="Site logo" class="brand-logo">
+              {% endif %}
             </div>
             <div>
               <div class="brand-title">{{ site_title }}</div>
-              <div class="brand-subtitle">Arch doc</div>
+              <div class="brand-subtitle">
+                {% if site_subtitle is defined %}{{ site_subtitle }}{% else %}Arch doc{% endif %}
+              </div>
             </div>
           </a>
 
@@ -87,7 +93,7 @@
           </div>
 
           <footer class="main-footer">
-            <span>Arch by Srotas Space</span>
+            <span>{% if site_footer is defined %}{{ site_footer }}{% else %}Arch by Srotas Space{% endif %}</span>
             <span>Static export ready</span>
           </footer>
         </main>

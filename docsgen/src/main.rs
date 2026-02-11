@@ -93,6 +93,14 @@ struct SiteMeta {
     default_lang: String,
 }
 
+#[derive(Clone, Debug, Default)]
+struct SiteConfig {
+    title: Option<String>,
+    logo: Option<String>,
+    footer: Option<String>,
+    subtitle: Option<String>,
+}
+
 #[actix_web::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -127,8 +135,9 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
     let site = collect_site_meta(&args.docs_dir)?;
     for lang in &site.langs {
         for page in &lang.pages {
-            let nav_groups =
-                load_nav_groups(&args.docs_dir.join(&lang.code), &lang.pages, &page.url);
+        let nav_groups =
+            load_nav_groups(&args.docs_dir.join(&lang.code), &lang.pages, &page.url);
+        let site_config = load_site_config(&args.docs_dir, &lang.code);
             let md_path = args
                 .docs_dir
                 .join(&lang.code)
@@ -148,7 +157,20 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
             let architecture_text_html = markdown_to_html(&text_md);
 
             let mut ctx = TeraContext::new();
-            ctx.insert("site_title", &args.site_title);
+            let title = site_config
+                .title
+                .as_deref()
+                .unwrap_or(&args.site_title);
+            ctx.insert("site_title", &title);
+            if let Some(logo) = &site_config.logo {
+                ctx.insert("site_logo", logo);
+            }
+            if let Some(footer) = &site_config.footer {
+                ctx.insert("site_footer", footer);
+            }
+            if let Some(subtitle) = &site_config.subtitle {
+                ctx.insert("site_subtitle", subtitle);
+            }
             ctx.insert("page_title", &page.title);
             ctx.insert("lang", &lang.code);
             ctx.insert("content_html", &content_html);
@@ -572,6 +594,38 @@ fn load_include_order(lang_dir: &Path) -> Result<Vec<String>> {
         }
     }
     Ok(order)
+}
+
+fn load_site_config(docs_dir: &Path, lang: &str) -> SiteConfig {
+    let mut config = SiteConfig::default();
+    let global = docs_dir.join("site.md");
+    let lang_specific = docs_dir.join(lang).join("site.md");
+
+    for path in [global, lang_specific] {
+        if !path.exists() {
+            continue;
+        }
+        if let Ok(content) = fs::read_to_string(&path) {
+            for line in content.lines() {
+                let trimmed = line.trim();
+                if trimmed.starts_with('#') || trimmed.is_empty() {
+                    continue;
+                }
+                if let Some((key, value)) = trimmed.split_once(':') {
+                    let key = key.trim();
+                    let value = value.trim().trim_matches('"');
+                    match key {
+                        "title" => config.title = Some(value.to_string()),
+                        "logo" => config.logo = Some(value.to_string()),
+                        "footer" => config.footer = Some(value.to_string()),
+                        "subtitle" => config.subtitle = Some(value.to_string()),
+                        _ => {}
+                    }
+                }
+            }
+        }
+    }
+    config
 }
 
 fn order_index(include_order: &[String], source_rel: &str, rel_slug: &str) -> usize {
