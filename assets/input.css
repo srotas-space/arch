@@ -50,6 +50,18 @@
     @apply mb-6 space-y-1;
   }
 
+  .nav-group {
+    @apply border-b border-white/15 pb-3;
+  }
+
+  .nav-group-title {
+    @apply cursor-pointer list-none px-2 py-2 text-[11px] uppercase tracking-[0.28em] text-white/80;
+  }
+
+  .nav-group-items {
+    @apply space-y-1 pb-2;
+  }
+
   .sidebar-section {
     @apply border-t border-slate-800 pt-4;
   }

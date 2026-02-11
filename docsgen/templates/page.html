@@ -19,11 +19,26 @@
           </a>
 
           <div class="sidebar-nav">
-            {% for page in nav_pages %}
-              <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}">
-                {{ page.title }}
-              </a>
-            {% endfor %}
+            {% if nav_groups | length > 0 %}
+              {% for group in nav_groups %}
+                <details class="nav-group" {% if group.open %}open{% endif %}>
+                  <summary class="nav-group-title">{{ group.title }}</summary>
+                  <div class="nav-group-items">
+                    {% for page in group.items %}
+                      <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}">
+                        {{ page.title }}
+                      </a>
+                    {% endfor %}
+                  </div>
+                </details>
+              {% endfor %}
+            {% else %}
+              {% for page in nav_pages %}
+                <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}">
+                  {{ page.title }}
+                </a>
+              {% endfor %}
+            {% endif %}
           </div>
 
           <div class="sidebar-section">

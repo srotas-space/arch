@@ -212,6 +212,24 @@ All `@include:` paths are relative to the language folder (e.g., `docs/en/`).
 
 `welcome.md` is treated as the default page for that language and will be served at `/en/`. `template.md` remains a normal page.
 
+## Submenus (two-level, collapsible)
+
+Create `docs/<lang>/nav.md` to define grouped navigation. Only two levels are supported (group → page).
+
+Example `docs/en/nav.md`:
+
+```md
+[Overview]
+- welcome.md
+- getting-started.md
+
+[Architecture]
+- architecture.md
+- mine-test.md
+```
+
+Groups render as collapsible sections in the sidebar.
+
 ## Testing / QA
 
 - Verify the dev server:

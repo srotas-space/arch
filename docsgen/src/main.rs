@@ -69,6 +69,19 @@ struct PageMeta {
 }
 
 #[derive(Clone, Debug, Serialize)]
+struct NavItem {
+    title: String,
+    url: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct NavGroup {
+    title: String,
+    items: Vec<NavItem>,
+    open: bool,
+}
+
+#[derive(Clone, Debug, Serialize)]
 struct LangMeta {
     code: String,
     pages: Vec<PageMeta>,
@@ -114,6 +127,8 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
     let site = collect_site_meta(&args.docs_dir)?;
     for lang in &site.langs {
         for page in &lang.pages {
+            let nav_groups =
+                load_nav_groups(&args.docs_dir.join(&lang.code), &lang.pages, &page.url);
             let md_path = args
                 .docs_dir
                 .join(&lang.code)
@@ -141,6 +156,7 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
             ctx.insert("architecture_html", &architecture_html);
             ctx.insert("architecture_json_html", &architecture_json_html);
             ctx.insert("architecture_text_html", &architecture_text_html);
+            ctx.insert("nav_groups", &nav_groups);
             ctx.insert("nav_pages", &lang.pages);
             ctx.insert("current_url", &page.url);
             ctx.insert("langs", &site.langs);
@@ -465,6 +481,78 @@ fn watch_and_rebuild(args: BuildArgs) -> NotifyResult<()> {
         }
     }
     Ok(())
+}
+
+fn load_nav_groups(lang_dir: &Path, pages: &[PageMeta], current_url: &str) -> Vec<NavGroup> {
+    let nav_path = lang_dir.join("nav.md");
+    if !nav_path.exists() {
+        return Vec::new();
+    }
+
+    let content = match fs::read_to_string(&nav_path) {
+        Ok(value) => value,
+        Err(_) => return Vec::new(),
+    };
+
+    let mut page_map = std::collections::HashMap::new();
+    for page in pages {
+        page_map.insert(page.source_rel.clone(), page);
+        page_map.insert(page.rel_slug.clone(), page);
+    }
+
+    let mut groups: Vec<NavGroup> = Vec::new();
+    let mut current = NavGroup {
+        title: "General".to_string(),
+        items: Vec::new(),
+        open: false,
+    };
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if trimmed.starts_with('[') && trimmed.ends_with(']') && trimmed.len() > 2 {
+            if !current.items.is_empty() {
+                groups.push(current);
+            }
+            current = NavGroup {
+                title: trimmed.trim_start_matches('[').trim_end_matches(']').trim().to_string(),
+                items: Vec::new(),
+                open: false,
+            };
+            continue;
+        }
+
+        if let Some(rest) = trimmed.strip_prefix('-').or_else(|| trimmed.strip_prefix('*')) {
+            let mut item = rest.trim().to_string();
+            if item.is_empty() {
+                continue;
+            }
+            if !item.ends_with(".md") {
+                item.push_str(".md");
+            }
+            let page = page_map
+                .get(&item)
+                .or_else(|| page_map.get(item.trim_end_matches(".md")));
+            if let Some(page) = page {
+                let is_active = page.url == current_url;
+                current.items.push(NavItem {
+                    title: page.title.clone(),
+                    url: page.url.clone(),
+                });
+                if is_active {
+                    current.open = true;
+                }
+            }
+        }
+    }
+
+    if !current.items.is_empty() {
+        groups.push(current);
+    }
+
+    groups
 }
 
 fn load_include_order(lang_dir: &Path) -> Result<Vec<String>> {
