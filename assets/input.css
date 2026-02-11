@@ -59,11 +59,11 @@
   }
 
   .nav-group-title {
-    @apply cursor-pointer list-none px-2 py-2 text-[11px] uppercase tracking-[0.28em] text-white/80;
+    @apply cursor-pointer list-none px-2 py-2 text-[12px] font-extrabold uppercase tracking-[0.28em] text-white/95 ml-2.5;
   }
 
   .nav-group-items {
-    @apply space-y-1 pb-2;
+    @apply space-y-1 pb-2 pl-4;
   }
 
   .sidebar-section {
@@ -152,7 +152,7 @@
   }
 
   .nav-link {
-    @apply flex items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium text-white/85 transition;
+    @apply flex items-center justify-between rounded-lg px-3 py-2 text-[12px] font-normal text-white/85 transition;
   }
 
   .nav-link:hover {
