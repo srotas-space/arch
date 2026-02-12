@@ -115,7 +115,7 @@
   }
 
   .doc-split {
-    @apply mt-6 grid gap-[5px] lg:grid-cols-[1fr_420px];
+    @apply mt-6 grid gap-[5px] lg:grid-cols-[1fr_480px];
   }
 
   .doc-panel {
