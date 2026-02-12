@@ -132,6 +132,7 @@
 
   .doc-panel {
     @apply rounded-xl border border-slate-200 bg-white p-5;
+    overflow: hidden;
   }
 
   .panel-title {
@@ -157,6 +158,7 @@
 
   .panel-pane {
     @apply hidden;
+    overflow-x: auto;
   }
 
   .panel-pane-active {
@@ -190,6 +192,7 @@
 
   .markdown {
     @apply text-[15px] leading-7 text-slate-700;
+    overflow-wrap: anywhere;
   }
 
   .markdown h1,
