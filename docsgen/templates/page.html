@@ -26,6 +26,11 @@
             </div>
           </a>
 
+          <div class="sidebar-search">
+            <input id="searchInput" class="search-input" type="text" placeholder="Search docs...">
+            <div id="searchResults" class="search-results"></div>
+          </div>
+
           <div class="sidebar-nav">
             {% if nav_groups | length > 0 %}
               {% for group in nav_groups %}
@@ -110,6 +115,70 @@
         btn.addEventListener("click", () => setArchTab(btn.dataset.archTab));
       });
       setArchTab("arch");
+
+      const searchInput = document.getElementById("searchInput");
+      const searchResults = document.getElementById("searchResults");
+      let searchIndex = null;
+      const currentLang = "{{ lang }}";
+
+      const renderResults = (items) => {
+        if (!items.length) {
+          searchResults.innerHTML = "";
+          searchResults.classList.remove("search-results-open");
+          return;
+        }
+        const html = items
+          .map(
+            (item) =>
+              `<a class="search-result" href="${item.url}">
+                <div class="search-result-title">${item.title}</div>
+              </a>`
+          )
+          .join("");
+        searchResults.innerHTML = html;
+        searchResults.classList.add("search-results-open");
+      };
+
+      const filterResults = (query) => {
+        if (!searchIndex) return;
+        const tokens = query
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(Boolean);
+        if (!tokens.length) {
+          renderResults([]);
+          return;
+        }
+        const items = searchIndex
+          .filter((entry) => entry.lang === currentLang)
+          .filter((entry) =>
+            tokens.every((t) =>
+              `${entry.title} ${entry.content}`.toLowerCase().includes(t)
+            )
+          )
+          .slice(0, 4);
+        renderResults(items);
+      };
+
+      const ensureIndex = async () => {
+        if (searchIndex) return;
+        const res = await fetch("/search.json");
+        searchIndex = await res.json();
+      };
+
+      if (searchInput) {
+        searchInput.addEventListener("input", async (e) => {
+          const value = e.target.value.trim();
+          await ensureIndex();
+          filterResults(value);
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!searchResults.contains(e.target) && e.target !== searchInput) {
+            renderResults([]);
+          }
+        });
+      }
     </script>
   </body>
 </html>

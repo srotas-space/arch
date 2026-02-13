@@ -263,6 +263,7 @@ Groups render as collapsible sections in the sidebar.
 - **Generator logic:** `docsgen/src/main.rs`
 - **Content:** `docs/<lang>/*.md`
 - **Logo:** replace `assets/logo.png` (recommended 24×24 inside a 40×40 container)
+- **Search index:** generated at `public/search.json` during `build`
 
 ## Common tasks
 

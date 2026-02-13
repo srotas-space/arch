@@ -101,6 +101,15 @@ struct SiteConfig {
     subtitle: Option<String>,
 }
 
+#[derive(Clone, Debug, Serialize)]
+struct SearchEntry {
+    lang: String,
+    title: String,
+    url: String,
+    excerpt: String,
+    content: String,
+}
+
 #[actix_web::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -133,11 +142,12 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
     prepare_output_dir(&args.out_dir)?;
 
     let site = collect_site_meta(&args.docs_dir)?;
+    let mut search_entries: Vec<SearchEntry> = Vec::new();
     for lang in &site.langs {
         for page in &lang.pages {
-        let nav_groups =
-            load_nav_groups(&args.docs_dir.join(&lang.code), &lang.pages, &page.url);
-        let site_config = load_site_config(&args.docs_dir, &lang.code);
+            let nav_groups =
+                load_nav_groups(&args.docs_dir.join(&lang.code), &lang.pages, &page.url);
+            let site_config = load_site_config(&args.docs_dir, &lang.code);
             let md_path = args
                 .docs_dir
                 .join(&lang.code)
@@ -155,6 +165,8 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
             let architecture_html = markdown_to_html(&arch_md);
             let architecture_json_html = markdown_to_html(&json_md);
             let architecture_text_html = markdown_to_html(&text_md);
+            let content_text = markdown_to_text(&expanded);
+            let excerpt = content_text.chars().take(160).collect::<String>();
 
             let mut ctx = TeraContext::new();
             let title = site_config
@@ -195,10 +207,19 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
             }
             fs::write(&out_path, rendered)
                 .with_context(|| format!("failed to write {}", out_path.display()))?;
+
+            search_entries.push(SearchEntry {
+                lang: lang.code.clone(),
+                title: page.title.clone(),
+                url: page.url.clone(),
+                excerpt,
+                content: content_text,
+            });
         }
     }
 
     copy_assets(&args.assets_dir, &args.out_dir.join("assets"))?;
+    write_search_index(&args.out_dir, &search_entries)?;
 
     let marker = args.out_dir.join(".docsgen");
     fs::write(marker, "managed by docsgen")?;
@@ -626,6 +647,42 @@ fn load_site_config(docs_dir: &Path, lang: &str) -> SiteConfig {
         }
     }
     config
+}
+
+fn write_search_index(out_dir: &Path, entries: &[SearchEntry]) -> Result<()> {
+    let path = out_dir.join("search.json");
+    let json = serde_json::to_string(entries)?;
+    fs::write(path, json)?;
+    Ok(())
+}
+
+fn markdown_to_text(md: &str) -> String {
+    let mut out = String::new();
+    let mut in_code = false;
+    for line in md.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("```") {
+            in_code = !in_code;
+            continue;
+        }
+        if in_code {
+            continue;
+        }
+        if trimmed.starts_with("@include:") {
+            continue;
+        }
+        let cleaned = trimmed
+            .trim_start_matches('#')
+            .trim_start_matches('*')
+            .trim_start_matches('-')
+            .trim();
+        let cleaned = cleaned.replace('`', "");
+        if !cleaned.is_empty() {
+            out.push_str(&cleaned);
+            out.push(' ');
+        }
+    }
+    out
 }
 
 fn order_index(include_order: &[String], source_rel: &str, rel_slug: &str) -> usize {
