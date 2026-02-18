@@ -220,11 +220,34 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
 
     copy_assets(&args.assets_dir, &args.out_dir.join("assets"))?;
     write_search_index(&args.out_dir, &search_entries)?;
+    write_root_index(&args.out_dir, &site.default_lang)?;
 
     let marker = args.out_dir.join(".docsgen");
     fs::write(marker, "managed by docsgen")?;
 
     Ok(site)
+}
+
+fn write_root_index(out_dir: &Path, default_lang: &str) -> Result<()> {
+    let target = format!("/{default_lang}/");
+    let html = format!(
+        "<!doctype html>\n\
+<html lang=\"en\">\n\
+<head>\n\
+  <meta charset=\"utf-8\">\n\
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\
+  <title>Redirecting...</title>\n\
+  <meta http-equiv=\"refresh\" content=\"0; url={target}\">\n\
+  <script>window.location.replace('{target}');</script>\n\
+</head>\n\
+<body>\n\
+  <p>Redirecting to <a href=\"{target}\">{target}</a></p>\n\
+</body>\n\
+</html>\n"
+    );
+    fs::write(out_dir.join("index.html"), html)
+        .with_context(|| format!("failed to write {}/index.html", out_dir.display()))?;
+    Ok(())
 }
 
 async fn serve_site(args: ServeArgs, site: SiteMeta) -> Result<()> {
