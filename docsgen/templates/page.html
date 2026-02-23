@@ -180,5 +180,27 @@
         });
       }
     </script>
+    {% if dev_reload %}
+    <script>
+      (() => {
+        let lastValue = null;
+        const poll = async () => {
+          try {
+            const res = await fetch("/__reload", { cache: "no-store" });
+            const text = await res.text();
+            if (lastValue && lastValue !== text) {
+              window.location.reload();
+              return;
+            }
+            lastValue = text;
+          } catch (err) {
+            // Ignore transient errors while rebuilding.
+          }
+          setTimeout(poll, 800);
+        };
+        poll();
+      })();
+    </script>
+    {% endif %}
   </body>
 </html>

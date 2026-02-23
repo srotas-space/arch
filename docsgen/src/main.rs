@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{mpsc, Arc};
 use std::time::Duration;
 
 use actix_files::Files;
@@ -116,21 +117,23 @@ async fn main() -> Result<()> {
 
     match cli.command {
         Commands::Build(args) => {
-            build_site(&args).context("build failed")?;
+            build_site(&args, false).context("build failed")?;
         }
         Commands::Serve(args) => {
-            let site = build_site(&args.build).context("build failed")?;
+            let reload_state = Arc::new(AtomicU64::new(now_millis()));
+            let site = build_site(&args.build, args.watch).context("build failed")?;
+            reload_state.store(now_millis(), Ordering::Release);
             if args.watch {
-                start_watcher(args.build.clone());
+                start_watcher(args.build.clone(), reload_state.clone());
             }
-            serve_site(args, site).await?;
+            serve_site(args, site, reload_state).await?;
         }
     }
 
     Ok(())
 }
 
-fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
+fn build_site(args: &BuildArgs, dev_reload: bool) -> Result<SiteMeta> {
     if !args.docs_dir.exists() {
         return Err(anyhow!("docs dir not found: {}", args.docs_dir.display()));
     }
@@ -194,7 +197,7 @@ fn build_site(args: &BuildArgs) -> Result<SiteMeta> {
             ctx.insert("nav_pages", &lang.pages);
             ctx.insert("current_url", &page.url);
             ctx.insert("langs", &site.langs);
-            ctx.insert("dev_reload", &false);
+            ctx.insert("dev_reload", &dev_reload);
 
             let rendered = tera
                 .render("page.html", &ctx)
@@ -250,7 +253,11 @@ fn write_root_index(out_dir: &Path, default_lang: &str) -> Result<()> {
     Ok(())
 }
 
-async fn serve_site(args: ServeArgs, site: SiteMeta) -> Result<()> {
+async fn serve_site(
+    args: ServeArgs,
+    site: SiteMeta,
+    reload_state: Arc<AtomicU64>,
+) -> Result<()> {
     let out_dir = args.build.out_dir.clone();
     let default_lang = site.default_lang.clone();
 
@@ -260,6 +267,8 @@ async fn serve_site(args: ServeArgs, site: SiteMeta) -> Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(default_lang.clone()))
+            .app_data(web::Data::new(reload_state.clone()))
+            .route("/__reload", web::get().to(reload_poll))
             .route("/", web::get().to(root_redirect))
             .route("/{lang}", web::get().to(lang_redirect))
             .service(Files::new("/", &out_dir).index_file("index.html"))
@@ -282,6 +291,13 @@ async fn lang_redirect(path: web::Path<String>) -> impl Responder {
     HttpResponse::Found()
         .append_header((LOCATION, format!("/{}/", lang)))
         .finish()
+}
+
+async fn reload_poll(state: web::Data<Arc<AtomicU64>>) -> impl Responder {
+    let value = state.load(Ordering::Acquire);
+    HttpResponse::Ok()
+        .content_type("text/plain")
+        .body(value.to_string())
 }
 
 fn prepare_output_dir(out_dir: &Path) -> Result<()> {
@@ -517,15 +533,15 @@ fn split_sections(md: &str) -> (String, String, String, String) {
     (description, architecture, architecture_json, architecture_text)
 }
 
-fn start_watcher(args: BuildArgs) {
+fn start_watcher(args: BuildArgs, reload_state: Arc<AtomicU64>) {
     std::thread::spawn(move || {
-        if let Err(err) = watch_and_rebuild(args) {
+        if let Err(err) = watch_and_rebuild(args, reload_state) {
             eprintln!("watcher error: {err}");
         }
     });
 }
 
-fn watch_and_rebuild(args: BuildArgs) -> NotifyResult<()> {
+fn watch_and_rebuild(args: BuildArgs, reload_state: Arc<AtomicU64>) -> NotifyResult<()> {
     let (tx, rx) = mpsc::channel();
     let mut watcher = notify::recommended_watcher(tx)?;
     watcher.watch(&args.docs_dir, RecursiveMode::Recursive)?;
@@ -537,8 +553,10 @@ fn watch_and_rebuild(args: BuildArgs) -> NotifyResult<()> {
             Ok(_) => pending = true,
             Err(mpsc::RecvTimeoutError::Timeout) => {
                 if pending {
-                    if let Err(err) = build_site(&args) {
+                    if let Err(err) = build_site(&args, true) {
                         eprintln!("rebuild failed: {err}");
+                    } else {
+                        reload_state.store(now_millis(), Ordering::Release);
                     }
                     pending = false;
                 }
@@ -722,6 +740,14 @@ fn order_index(include_order: &[String], source_rel: &str, rel_slug: &str) -> us
         return pos + 2;
     }
     usize::MAX
+}
+
+fn now_millis() -> u64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_millis() as u64)
+        .unwrap_or(0)
 }
 
 fn expand_includes(md: &str, base_dir: &Path) -> Result<String> {

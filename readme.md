@@ -19,7 +19,7 @@ cd arch
 ```bash
 npm install
 npm run build:css
-cargo run --manifest-path docsgen/Cargo.toml -- serve
+cargo run --manifest-path docsgen/Cargo.toml -- serve --watch
 ```
 
 Open: `http://127.0.0.1:8088/`

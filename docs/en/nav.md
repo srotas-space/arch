@@ -2,6 +2,11 @@
 - welcome.md
 - getting-started.md
 
+
+[Mine]
+- mine.md
+
+
 [Architecture]
 - architecture.md
 - mine-test.md
@@ -14,3 +19,5 @@
 [Operations]
 - monitoring.md
 - incident-response.md
+
+
