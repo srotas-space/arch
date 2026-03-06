@@ -14,6 +14,11 @@ git clone https://github.com/srotas-space/arch.git
 cd arch
 ```
 
+```bash
+cargo test --manifest-path docsgen/Cargo.toml
+cargo build --manifest-path docsgen/Cargo.toml
+```
+
 3) Follow the Quick start steps below.
 
 ```bash

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/assets/app.css">
   </head>
   <body class="bg-slate-100 text-slate-900">
-    <div class="relative min-h-screen overflow-hidden">
+    <div class="relative min-h-screen overflow-x-hidden">
       <div class="relative flex w-full flex-col gap-0 px-0 py-0 lg:flex-row">
         <aside class="sidebar">
           <a class="sidebar-brand" href="/">
@@ -73,12 +73,14 @@
             </div>
           </div>
 
-          <div class="doc-split">
+          {% set has_arch = architecture_html | trim | length > 0 or architecture_json_html | trim | length > 0 or architecture_text_html | trim | length > 0 %}
+          <div class="doc-split{% if not has_arch %} doc-split-full{% endif %}">
             <section class="doc-panel">
               <div id="description" class="markdown panel-body">
                 {{ description_html | safe }}
               </div>
             </section>
+            {% if has_arch %}
             <section class="doc-panel">
               <div class="panel-tabs">
                 <button class="panel-tab panel-tab-active" data-arch-tab="arch" type="button">Arch</button>
@@ -95,6 +97,7 @@
                 {{ architecture_text_html | safe }}
               </div>
             </section>
+            {% endif %}
           </div>
 
           <footer class="main-footer">

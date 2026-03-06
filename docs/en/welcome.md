@@ -1,20 +1,30 @@
 # Welcome
 
+## Description
+
 This stack is built for writing clean API docs without a backend.
 
-## Run locally
+## Architecture
 
-```bash
-npm install
-npm run build:css
+### Arch
 
-cargo run --manifest-path docsgen/Cargo.toml -- serve
+```
+[Markdown] -> [Rust Generator] -> [Static HTML]
+           |-> [Actix Dev Server] -> [Browser]
 ```
 
-## Build static HTML
+### JSON
 
-```bash
-cargo run --manifest-path docsgen/Cargo.toml -- build
+```json
+{
+  "run_locally": ["npm install", "npm run build:css", "cargo run --manifest-path docsgen/Cargo.toml -- serve"],
+  "build": "cargo run --manifest-path docsgen/Cargo.toml -- build",
+  "output": "public/"
+}
 ```
 
-The generator writes static files into `public/`.
+### Text
+
+Run `npm install` and `npm run build:css` once to compile styles.
+Start the dev server with `cargo run --manifest-path docsgen/Cargo.toml -- serve`.
+To export a static site, run `cargo run --manifest-path docsgen/Cargo.toml -- build` — output goes to `public/`.

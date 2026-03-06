@@ -144,18 +144,49 @@
   }
 
   .doc-split {
-    @apply mt-6 flex flex-col gap-[5px] lg:flex-row;
+    @apply mt-6 flex flex-col gap-[5px];
+    max-width: 1400px;
   }
 
-  @media (min-width: 1024px) {
-    .doc-split > .doc-panel:last-child {
-      width: 480px;
-      max-width: 480px;
-      min-width: 480px;
+  .doc-split-full {
+    @apply mt-6 flex flex-col gap-[5px];
+    max-width: 860px;
+  }
+
+  /* Stable two-panel desktop layout. Right panel is sticky so it stays
+     visible while scrolling long descriptions. */
+  @media (min-width: 900px) {
+    .doc-split-full {
+      flex-direction: row;
     }
-    .doc-split > .doc-panel:first-child {
-      flex: 1 1 auto;
+
+    .doc-split-full > .doc-panel:first-child {
+      flex: 1 1 0;
       min-width: 0;
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .doc-split {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .doc-split > .doc-panel:first-child {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .doc-split > .doc-panel:last-child {
+      flex: 0 0 clamp(400px, 40%, 560px);
+      width: clamp(400px, 40%, 560px);
+      min-width: 0;
+      position: sticky;
+      top: 1.5rem;
+      max-height: calc(100vh - 3rem);
+      overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 
@@ -268,6 +299,11 @@
 
   .markdown code {
     @apply rounded bg-slate-200 px-1 py-0.5 text-xs text-slate-800;
+  }
+
+  .markdown pre code {
+    @apply bg-transparent p-0 text-inherit;
+    border-radius: 0;
   }
 
   .markdown table {
