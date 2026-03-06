@@ -1,15 +1,6 @@
 [Overview]
 - welcome.md
-- getting-started.md
-
-
-[Mine]
-- mine.md
-
-
-[Architecture]
 - architecture.md
-- mine-test.md
 
 [Infrastructure]
 - network.md
@@ -19,5 +10,3 @@
 [Operations]
 - monitoring.md
 - incident-response.md
-
-
