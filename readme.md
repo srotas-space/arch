@@ -53,6 +53,31 @@ Output is written to `public/`. The folder is self-contained — upload it to an
 
 ## Deploy
 
+### Push to deploy branch
+
+The script `scripts/push-to-deploy-branch.sh` builds the site and force-pushes only the `public/` contents to a target branch (default: `deploy`). Use this for any static host that serves from a branch (Netlify, Cloudflare Pages, etc.).
+
+```bash
+# Build + push to deploy branch
+./scripts/push-to-deploy-branch.sh
+
+# Push to a different branch
+./scripts/push-to-deploy-branch.sh staging
+
+# Skip the build step (push current public/ as-is)
+SKIP_BUILD=1 ./scripts/push-to-deploy-branch.sh
+```
+
+| Env var | Default | Description |
+| --- | --- | --- |
+| `DEPLOY_BRANCH` | `deploy` | Target branch to push to |
+| `REMOTE` | `origin` | Git remote name |
+| `SKIP_BUILD` | `0` | Set to `1` to skip CSS + site build |
+
+---
+
+
+
 ### Netlify
 
 - Build command: `npm install && npm run build:css && cargo run --manifest-path docsgen/Cargo.toml -- build`
