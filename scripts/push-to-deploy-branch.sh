@@ -3,24 +3,24 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-DEPLOY_BRANCH="${DEPLOY_BRANCH:-${1:-gh-pages}}"
+DEPLOY_BRANCH="${DEPLOY_BRANCH:-${1:-deploy}}"
 REMOTE="${REMOTE:-origin}"
 SKIP_BUILD="${SKIP_BUILD:-0}"
 
 usage() {
   cat <<'EOF'
-Deploy static docs by pushing only public/ contents to a deploy branch.
+Push public/ contents to the deploy branch.
 
 Env vars:
-  DEPLOY_BRANCH      Target deploy branch (default: gh-pages)
+  DEPLOY_BRANCH      Target branch (default: deploy)
   REMOTE             Git remote name (default: origin)
   SKIP_BUILD         Set to 1 to skip CSS/site build before push (default: 0)
 
 Examples:
-  ./scripts/deploy-public.sh
-  ./scripts/deploy-public.sh any-branch-name
-  DEPLOY_BRANCH=docs ./scripts/deploy-public.sh
-  SKIP_BUILD=1 ./scripts/deploy-public.sh
+  ./scripts/push-to-deploy-branch.sh
+  ./scripts/push-to-deploy-branch.sh my-branch
+  DEPLOY_BRANCH=staging ./scripts/push-to-deploy-branch.sh
+  SKIP_BUILD=1 ./scripts/push-to-deploy-branch.sh
 EOF
 }
 
