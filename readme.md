@@ -203,13 +203,41 @@ theme: violet
 
 ## Themes
 
-Set `theme:` in `docs/site.md`, exactly like `title` or `logo`:
+### How to change the theme
+
+**Step 1** — open `docs/site.md` and set the `theme:` line to any theme from the table below:
 
 ```md
+title: Srotas Space
+subtitle: Infra Arch
+logo: /assets/logo.png
+footer: Arch by Srotas Space
 theme: ocean
 ```
 
-| Theme | Look |
+**Step 2** — rebuild:
+
+```bash
+cargo run --manifest-path docsgen/Cargo.toml -- build
+```
+
+That's it. If the dev server is already running with `--watch`, skip step 2 entirely — saving `site.md` rebuilds and reloads the browser automatically:
+
+```bash
+cargo run --manifest-path docsgen/Cargo.toml -- serve --watch
+```
+
+> You do **not** need to run `npm run build:css` when switching themes. All palettes are already compiled into `assets/app.css`; the theme is selected at build time via a `data-theme` attribute on `<html>`. CSS only needs recompiling if you edit `assets/input.css` itself.
+
+If `theme:` is missing, the site uses `violet`. A name that isn't in the table falls back to `violet` and prints a warning during the build:
+
+```
+warning: unknown theme 'blue' in site.md; using 'violet'. Available: violet, ocean, forest, ember, slate
+```
+
+### Available themes
+
+| Value | Look |
 | --- | --- |
 | `violet` | Purple → amber gradient (default) |
 | `ocean` | Deep blue → teal |
@@ -217,17 +245,60 @@ theme: ocean
 | `ember` | Rust → orange |
 | `slate` | Neutral grey → sky |
 
-Every theme ships a **light and a dark palette**. The dark one is applied automatically when the visitor's operating system is set to dark mode — there is no toggle to configure and no JavaScript involved. An unknown theme name falls back to `violet` and prints a warning during build.
+### Light and dark
 
-Per-language overrides work too — `docs/hi/site.md` with `theme: forest` themes only the Hindi pages.
+Every theme ships a **light and a dark palette**. The dark one is applied automatically when the visitor's operating system is set to dark mode. There is no toggle to configure and no JavaScript involved — it is pure CSS (`prefers-color-scheme`), so it works on any static host.
+
+To preview the dark palette, switch your OS appearance to dark and reload the page.
+
+### Different theme per language
+
+`theme:` in `docs/site.md` applies to the whole site. To theme one language differently, set it in that language's own settings file — `docs/hi/site.md`:
+
+```md
+theme: forest
+```
+
+Now the Hindi pages render in `forest` while everything else keeps the global theme. Per-language values override the global one.
 
 ### Adding your own theme
 
-1. Copy a `[data-theme="..."]` block in `assets/input.css` (both the light block and its counterpart in the `prefers-color-scheme: dark` section) and rename the selector.
-2. Add the name to `THEMES` in `docsgen/src/main.rs`.
-3. Run `npm run build:css`.
+**Step 1** — in `assets/input.css`, copy an existing `[data-theme="..."]` block and rename the selector. Copy **both** halves: the light block near the top, and its counterpart inside the `@media (prefers-color-scheme: dark)` section.
 
-Themes are plain CSS custom properties — `--bg`, `--surface`, `--fg`, `--accent-from/mid/to`, `--sidebar-grad`, `--code-bg`, and friends. Components reference the tokens, so changing a palette never means touching component rules.
+**Step 2** — register the name in `docsgen/src/main.rs` so it passes validation:
+
+```rust
+const THEMES: [&str; 5] = ["violet", "ocean", "forest", "ember", "slate"];
+```
+
+Add your name to the list and bump the array length.
+
+**Step 3** — recompile the CSS, then build:
+
+```bash
+npm run build:css
+cargo run --manifest-path docsgen/Cargo.toml -- build
+```
+
+Note that `serve --watch` only watches `docs/` and `docsgen/templates/` — it does not watch `assets/`. While tuning a palette, run `npm run dev:css` in a second terminal to recompile on save.
+
+Themes are plain CSS custom properties, so a palette is just a list of values:
+
+| Token | Controls |
+| --- | --- |
+| `--bg`, `--bg-dot` | Page background and dot grid |
+| `--surface`, `--surface-2` | Card backgrounds, table headers, chips |
+| `--border` | All hairline borders |
+| `--fg`, `--fg-muted`, `--fg-subtle` | Headings, body text, meta text |
+| `--accent-from`, `--accent-mid`, `--accent-to` | Gradient for titles, active tabs, tags |
+| `--accent-soft`, `--accent-ink` | Inline `code` background and text |
+| `--code-bg`, `--code-fg` | Fenced code blocks |
+| `--sidebar-grad` | Sidebar gradient |
+| `--sidebar-pill-ink` | Text on the active language pill |
+| `--search-panel-bg` | Search results dropdown |
+| `--selection` | Text selection highlight |
+
+Components reference these tokens, so changing a palette never means touching component rules.
 
 ---
 
