@@ -1,7 +1,8 @@
+use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{mpsc, Arc};
+use std::sync::{mpsc, Arc, Mutex, OnceLock};
 use std::time::Duration;
 
 use actix_files::Files;
@@ -100,7 +101,13 @@ struct SiteConfig {
     logo: Option<String>,
     footer: Option<String>,
     subtitle: Option<String>,
+    theme: Option<String>,
 }
+
+/// Theme presets defined in `assets/input.css`. Adding a theme means adding a
+/// `[data-theme="name"]` block there (light + dark) and a name here.
+const THEMES: [&str; 5] = ["violet", "ocean", "forest", "ember", "slate"];
+const DEFAULT_THEME: &str = "violet";
 
 #[derive(Clone, Debug, Serialize)]
 struct SearchEntry {
@@ -186,6 +193,7 @@ fn build_site(args: &BuildArgs, dev_reload: bool) -> Result<SiteMeta> {
             if let Some(subtitle) = &site_config.subtitle {
                 ctx.insert("site_subtitle", subtitle);
             }
+            ctx.insert("site_theme", &resolve_theme(site_config.theme.as_deref()));
             ctx.insert("page_title", &page.title);
             ctx.insert("lang", &lang.code);
             ctx.insert("content_html", &content_html);
@@ -681,6 +689,7 @@ fn load_site_config(docs_dir: &Path, lang: &str) -> SiteConfig {
                         "logo" => config.logo = Some(value.to_string()),
                         "footer" => config.footer = Some(value.to_string()),
                         "subtitle" => config.subtitle = Some(value.to_string()),
+                        "theme" => config.theme = Some(value.to_lowercase()),
                         _ => {}
                     }
                 }
@@ -688,6 +697,31 @@ fn load_site_config(docs_dir: &Path, lang: &str) -> SiteConfig {
         }
     }
     config
+}
+
+/// Map the `theme:` value from site.md to a known preset, falling back to the
+/// default so a typo yields a styled site plus one warning rather than a
+/// page with no palette at all.
+fn resolve_theme(requested: Option<&str>) -> String {
+    let Some(name) = requested.map(str::trim).filter(|s| !s.is_empty()) else {
+        return DEFAULT_THEME.to_string();
+    };
+    if THEMES.contains(&name) {
+        return name.to_string();
+    }
+
+    // load_site_config runs once per page, so warn only once per bad value.
+    static WARNED: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
+    let warned = WARNED.get_or_init(|| Mutex::new(HashSet::new()));
+    if let Ok(mut seen) = warned.lock() {
+        if seen.insert(name.to_string()) {
+            eprintln!(
+                "warning: unknown theme '{name}' in site.md; using '{DEFAULT_THEME}'. Available: {}",
+                THEMES.join(", ")
+            );
+        }
+    }
+    DEFAULT_THEME.to_string()
 }
 
 fn write_search_index(out_dir: &Path, entries: &[SearchEntry]) -> Result<()> {

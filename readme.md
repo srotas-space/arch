@@ -196,7 +196,38 @@ title: Srotas Space
 subtitle: Infra Arch
 logo: /assets/logo.png
 footer: Arch by Srotas Space
+theme: violet
 ```
+
+---
+
+## Themes
+
+Set `theme:` in `docs/site.md`, exactly like `title` or `logo`:
+
+```md
+theme: ocean
+```
+
+| Theme | Look |
+| --- | --- |
+| `violet` | Purple → amber gradient (default) |
+| `ocean` | Deep blue → teal |
+| `forest` | Green → gold |
+| `ember` | Rust → orange |
+| `slate` | Neutral grey → sky |
+
+Every theme ships a **light and a dark palette**. The dark one is applied automatically when the visitor's operating system is set to dark mode — there is no toggle to configure and no JavaScript involved. An unknown theme name falls back to `violet` and prints a warning during build.
+
+Per-language overrides work too — `docs/hi/site.md` with `theme: forest` themes only the Hindi pages.
+
+### Adding your own theme
+
+1. Copy a `[data-theme="..."]` block in `assets/input.css` (both the light block and its counterpart in the `prefers-color-scheme: dark` section) and rename the selector.
+2. Add the name to `THEMES` in `docsgen/src/main.rs`.
+3. Run `npm run build:css`.
+
+Themes are plain CSS custom properties — `--bg`, `--surface`, `--fg`, `--accent-from/mid/to`, `--sidebar-grad`, `--code-bg`, and friends. Components reference the tokens, so changing a palette never means touching component rules.
 
 ---
 
@@ -247,6 +278,8 @@ Paths are relative to the language folder (e.g., `docs/en/`).
 | What | Where |
 | --- | --- |
 | Layout / HTML structure | `docsgen/templates/page.html` |
+| Theme | `theme:` in `docs/site.md` |
+| Theme palettes | `assets/input.css` → run `npm run build:css` |
 | Styles | `assets/input.css` → run `npm run build:css` |
 | Generator logic | `docsgen/src/main.rs` |
 | Content | `docs/<lang>/*.md` |
