@@ -17,7 +17,7 @@ npm run build:css
 cargo run --manifest-path docsgen/Cargo.toml -- serve --watch
 ```
 
-Open `http://127.0.0.1:8088/`
+Open `http://127.0.0.1:8095/`
 
 ---
 

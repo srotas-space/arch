@@ -52,7 +52,7 @@ struct ServeArgs {
     #[arg(long, default_value = "127.0.0.1")]
     host: String,
 
-    #[arg(long, default_value_t = 8088)]
+    #[arg(long, default_value_t = 8095)]
     port: u16,
 
     #[arg(long, default_value_t = false)]

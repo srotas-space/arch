@@ -507,7 +507,8 @@
   /* ─── Doc split ─────────────────────────────────────────── */
 
   .doc-split {
-    @apply mt-7 flex flex-col gap-4;
+    @apply mt-7 grid gap-4;
+    grid-template-columns: minmax(0, 1fr);
     max-width: 1380px;
   }
 
@@ -528,21 +529,24 @@
     }
   }
 
+  /* Two equal, fixed-width columns -- `minmax(0, 1fr)` on both tracks is
+     what keeps them locked at 50/50 regardless of content: without the
+     `0` minimum, a track sizes to its content's intrinsic width (e.g. a
+     long unwrapped ASCII-art line in the Arch tab), which is what let the
+     right panel balloon past its intended width before. Each panel's own
+     overflow (see `.panel-pane`/`.markdown pre` below) handles wide
+     content with an internal scrollbar instead. */
   @media (min-width: 900px) {
     .doc-split {
-      flex-direction: row;
-      align-items: flex-start;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
     }
 
-    .doc-split > .doc-panel:first-child {
-      flex: 1 1 0;
+    .doc-split > .doc-panel {
       min-width: 0;
     }
 
     .doc-split > .doc-panel:last-child {
-      flex: 0 0 clamp(380px, 40%, 540px);
-      width: clamp(380px, 40%, 540px);
-      min-width: 0;
       position: sticky;
       top: 1.75rem;
       max-height: calc(100vh - 3.5rem);
