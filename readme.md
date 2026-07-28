@@ -311,14 +311,15 @@ cargo run --manifest-path docsgen/Cargo.toml -- serve --watch
 If `theme:` is missing, the site uses `violet`. A name that isn't in the table falls back to `violet` and prints a warning during the build:
 
 ```
-warning: unknown theme 'blue' in site.md; using 'violet'. Available: violet, ocean, forest, ember, slate
+warning: unknown theme 'blue' in site.md; using 'violet'. Available: violet, indigo, ocean, forest, ember, slate
 ```
 
 ### Available themes
 
 | Value | Look |
 | --- | --- |
-| `violet` | Purple → amber gradient (default) |
+| `indigo` | Neutral slate with an indigo accent — light, closest to a typical API reference |
+| `violet` | Purple accent (default) |
 | `ocean` | Deep blue → teal |
 | `forest` | Green → gold |
 | `ember` | Rust → orange |
@@ -347,7 +348,7 @@ Now the Hindi pages render in `forest` while everything else keeps the global th
 **Step 2** — register the name in `docsgen/src/main.rs` so it passes validation:
 
 ```rust
-const THEMES: [&str; 5] = ["violet", "ocean", "forest", "ember", "slate"];
+const THEMES: [&str; 6] = ["violet", "indigo", "ocean", "forest", "ember", "slate"];
 ```
 
 Add your name to the list and bump the array length.

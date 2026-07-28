@@ -810,8 +810,10 @@
     overflow: hidden;
   }
 
-  /* Solid rather than transparent: prose sitting straight on the page's dot
-     grid is noticeably harder to read. Flat, though — no lifted-card shadow. */
+  /* Both panels are plain white cards on the canvas. The reference column
+     used to be a dark slab needing a long list of overrides to undo the
+     light styling underneath it; now that `--ref-*` resolves to the ordinary
+     palette, the base rules already fit and only the shell differs. */
   .doc-panel-prose {
     @apply px-6 py-5;
     background: var(--surface);
@@ -825,97 +827,6 @@
     background: var(--ref-bg);
     border: 1px solid var(--ref-border);
     box-shadow: var(--card-shadow);
-
-    /* Signal colours are re-pointed to their bright variants here: this
-       column is dark in light mode too, so the light-mode greens and reds
-       would be unreadable on it. */
-
-  }
-
-  .doc-panel-ref .panel-tabs {
-    border-bottom-color: var(--ref-border);
-  }
-
-  .doc-panel-ref .panel-tab {
-    color: var(--ref-fg-subtle);
-  }
-
-  .doc-panel-ref .panel-tab:hover:not(.panel-tab-active) {
-    color: var(--ref-fg);
-    background: var(--surface-2);
-  }
-
-  /* Needs the same specificity as the rule above, or `.doc-panel-ref
-     .panel-tab` outranks the standalone `.panel-tab-active` and the selected
-     tab ends up dimmer than its neighbours. */
-  .doc-panel-ref .panel-tab-active {
-    color: var(--ref-fg);
-  }
-
-  .doc-panel-ref .markdown,
-  .doc-panel-ref .markdown p,
-  .doc-panel-ref .markdown ul,
-  .doc-panel-ref .markdown ol,
-  .doc-panel-ref .markdown td {
-    color: var(--ref-fg-muted);
-  }
-
-  .doc-panel-ref .markdown h1,
-  .doc-panel-ref .markdown h2,
-  .doc-panel-ref .markdown h3,
-  .doc-panel-ref .markdown th {
-    color: var(--ref-fg);
-  }
-
-  .doc-panel-ref .markdown table,
-  .doc-panel-ref .markdown th,
-  .doc-panel-ref .markdown td {
-    border-color: var(--ref-border);
-  }
-
-  .doc-panel-ref .markdown thead,
-  .doc-panel-ref .markdown tbody tr:hover {
-    background: var(--surface-2);
-  }
-
-  .doc-panel-ref .markdown code {
-    color: var(--accent-ink);
-    background: var(--accent-soft);
-  }
-
-  /* Code inside the dark column sinks rather than floats. */
-  .doc-panel-ref .markdown pre {
-    background: var(--code-bg);
-    border-color: var(--border);
-    box-shadow: none;
-  }
-
-  .doc-panel-ref .api-block {
-    background: var(--ref-surface);
-    border-color: var(--ref-border);
-  }
-
-  .doc-panel-ref .api-block-label {
-    color: var(--ref-fg);
-  }
-
-  .doc-panel-ref .api-note {
-    color: var(--ref-fg-subtle);
-  }
-
-  .doc-panel-ref .api-generated {
-    color: var(--ref-fg-subtle);
-    border-color: var(--ref-border);
-  }
-
-  .doc-panel-ref .api-path {
-    color: var(--accent-ink);
-    background: var(--accent-soft);
-  }
-
-  .doc-panel-ref .code-block {
-    background: var(--code-bg);
-    border-color: var(--border);
   }
 
   .panel-title {
