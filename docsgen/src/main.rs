@@ -136,7 +136,7 @@ struct ApiBlock {
 
 /// Theme presets defined in `assets/input.css`. Adding a theme means adding a
 /// `[data-theme="name"]` block there (light + dark) and a name here.
-const THEMES: [&str; 5] = ["violet", "ocean", "forest", "ember", "slate"];
+const THEMES: [&str; 6] = ["violet", "indigo", "ocean", "forest", "ember", "slate"];
 const DEFAULT_THEME: &str = "violet";
 
 /// Host used when synthesising a curl sample from a request block. Override in

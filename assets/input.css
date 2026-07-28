@@ -8,7 +8,7 @@
    THEMES
 
    Pick one in docs/site.md:      theme: ocean
-   Available: violet (default), ocean, forest, ember, slate
+   Available: violet (default), indigo, ocean, forest, ember, slate
 
    Every theme ships a light and a dark palette. The dark one is
    applied automatically when the visitor's OS is in dark mode
@@ -42,9 +42,6 @@
     --accent-soft: rgba(139, 92, 246, 0.10);
     --accent-ink: #6d28d9;
 
-    --code-bg: #0f0a1e;
-    --code-fg: #c4b5fd;
-
     --sidebar-grad: linear-gradient(168deg, #3b0d9e 0%, #6f2cf0 30%, #8b5cf6 62%, #c2843a 100%);
     --sidebar-solid: #1c1330;
     --sidebar-pill-ink: #4c1d95;
@@ -72,9 +69,6 @@
     --accent-to: #14b8a6;
     --accent-soft: rgba(14, 165, 233, 0.10);
     --accent-ink: #0369a1;
-
-    --code-bg: #08222f;
-    --code-fg: #a5e8ff;
 
     --sidebar-grad: linear-gradient(168deg, #082f49 0%, #0c4a6e 32%, #0369a1 64%, #14b8a6 100%);
     --sidebar-solid: #0c2432;
@@ -104,9 +98,6 @@
     --accent-soft: rgba(34, 197, 94, 0.11);
     --accent-ink: #15803d;
 
-    --code-bg: #0a1f14;
-    --code-fg: #a7f3c4;
-
     --sidebar-grad: linear-gradient(168deg, #052e16 0%, #14532d 32%, #15803d 64%, #ca8a04 100%);
     --sidebar-solid: #0d2317;
     --sidebar-pill-ink: #14532d;
@@ -134,9 +125,6 @@
     --accent-to: #f59e0b;
     --accent-soft: rgba(249, 115, 22, 0.11);
     --accent-ink: #c2410c;
-
-    --code-bg: #24100a;
-    --code-fg: #fdd0a8;
 
     --sidebar-grad: linear-gradient(168deg, #431407 0%, #7c2d12 32%, #c2410c 64%, #f59e0b 100%);
     --sidebar-solid: #29160c;
@@ -166,14 +154,37 @@
     --accent-soft: rgba(100, 116, 139, 0.12);
     --accent-ink: #334155;
 
-    --code-bg: #0f172a;
-    --code-fg: #cbd5e1;
-
     --sidebar-grad: linear-gradient(168deg, #0f172a 0%, #1e293b 35%, #334155 70%, #64748b 100%);
     --sidebar-solid: #141b27;
     --sidebar-pill-ink: #1e293b;
     --search-panel-bg: rgba(12, 20, 34, 0.92);
     --selection: rgba(100, 116, 139, 0.22);
+  }
+
+  /* ─── Indigo — matches the admin panel's design tokens ──── */
+
+  [data-theme="indigo"] {
+    color-scheme: light dark;
+
+    --bg: #f8fafc;
+    --bg-dot: rgba(148, 163, 184, 0.20);
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --border: #e2e8f0;
+
+    --fg: #0f172a;
+    --fg-muted: #475569;
+    --fg-subtle: #94a3b8;
+
+    --accent-from: #4f46e5;
+    --accent-mid: #6366f1;
+    --accent-to: #4338ca;
+    --accent-soft: #eef2ff;
+    --accent-ink: #4338ca;
+
+    --sidebar-pill-ink: #4338ca;
+    --search-panel-bg: rgba(255, 255, 255, 0.98);
+    --selection: rgba(99, 102, 241, 0.18);
   }
 
   /* ═══ Dark palettes — auto-applied via OS preference ═══════ */
@@ -198,14 +209,33 @@
       --accent-soft: rgba(167, 139, 250, 0.16);
       --accent-ink: #ddd0ff;
 
-      --code-bg: #05030d;
-      --code-fg: #c4b5fd;
-
       --sidebar-grad: linear-gradient(168deg, #241056 0%, #3f1a91 34%, #5b30b3 68%, #8a6030 100%);
       --sidebar-solid: #130e22;
       --sidebar-pill-ink: #2a1160;
       --search-panel-bg: rgba(10, 5, 26, 0.94);
       --selection: rgba(167, 139, 250, 0.26);
+    }
+
+    [data-theme="indigo"] {
+      --bg: #0b1120;
+      --bg-dot: rgba(148, 163, 184, 0.12);
+      --surface: #111827;
+      --surface-2: #1a2233;
+      --border: rgba(255, 255, 255, 0.10);
+
+      --fg: #e8ecf5;
+      --fg-muted: #a5b0c3;
+      --fg-subtle: #6f7d94;
+
+      --accent-from: #818cf8;
+      --accent-mid: #a5b4fc;
+      --accent-to: #6366f1;
+      --accent-soft: rgba(129, 140, 248, 0.16);
+      --accent-ink: #c7d2fe;
+
+      --sidebar-pill-ink: #1e1b4b;
+      --search-panel-bg: rgba(11, 17, 32, 0.96);
+      --selection: rgba(129, 140, 248, 0.26);
     }
 
     [data-theme="ocean"] {
@@ -224,9 +254,6 @@
       --accent-to: #2dd4bf;
       --accent-soft: rgba(56, 189, 248, 0.16);
       --accent-ink: #bae6fd;
-
-      --code-bg: #04121a;
-      --code-fg: #a5e8ff;
 
       --sidebar-grad: linear-gradient(168deg, #041f30 0%, #073349 34%, #075985 68%, #0d7f77 100%);
       --sidebar-solid: #071923;
@@ -252,9 +279,6 @@
       --accent-soft: rgba(74, 222, 128, 0.15);
       --accent-ink: #bbf7d0;
 
-      --code-bg: #04120a;
-      --code-fg: #a7f3c4;
-
       --sidebar-grad: linear-gradient(168deg, #04220f 0%, #0d3a1f 34%, #14602f 68%, #8a6b0c 100%);
       --sidebar-solid: #08190f;
       --sidebar-pill-ink: #0d3a1f;
@@ -278,9 +302,6 @@
       --accent-to: #fbbf24;
       --accent-soft: rgba(251, 146, 60, 0.16);
       --accent-ink: #fed7aa;
-
-      --code-bg: #120704;
-      --code-fg: #fdd0a8;
 
       --sidebar-grad: linear-gradient(168deg, #2b0d04 0%, #5a2010 34%, #9a3412 68%, #b3790c 100%);
       --sidebar-solid: #1c0f07;
@@ -306,9 +327,6 @@
       --accent-soft: rgba(148, 163, 184, 0.16);
       --accent-ink: #dbe3ec;
 
-      --code-bg: #05090f;
-      --code-fg: #cbd5e1;
-
       --sidebar-grad: linear-gradient(168deg, #070c15 0%, #131c2b 35%, #24304a 70%, #3f5170 100%);
       --sidebar-solid: #0c121b;
       --sidebar-pill-ink: #131c2b;
@@ -322,15 +340,20 @@
   :root {
     --accent-grad: linear-gradient(90deg, var(--accent-from) 0%, var(--accent-mid) 50%, var(--accent-to) 100%);
 
-    /* The sidebar sits on a dark gradient in every theme, so its
-       foreground scale stays white-alpha across light and dark. */
-    --sidebar-fg: #ffffff;
-    --sidebar-fg-muted: rgba(255, 255, 255, 0.70);
-    --sidebar-fg-subtle: rgba(255, 255, 255, 0.45);
-    --sidebar-border: rgba(255, 255, 255, 0.12);
-    --sidebar-hover: rgba(255, 255, 255, 0.10);
-    --sidebar-active: rgba(255, 255, 255, 0.15);
-    --sidebar-field: rgba(255, 255, 255, 0.08);
+    /* The sidebar and the reference column are ordinary surfaces now, not
+       permanently dark slabs. Deriving them from the palette means one set
+       of rules covers light and dark instead of two. */
+    --border-strong: color-mix(in srgb, var(--fg-subtle) 55%, transparent);
+    --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+
+    --sidebar-bg: var(--surface);
+    --sidebar-fg: var(--fg);
+    --sidebar-fg-muted: var(--fg-muted);
+    --sidebar-fg-subtle: var(--fg-subtle);
+    --sidebar-border: var(--border);
+    --sidebar-hover: var(--surface-2);
+    --sidebar-active: var(--accent-soft);
+    --sidebar-field: var(--surface-2);
 
     /* HTTP verbs and status codes carry meaning, so they keep the same
        colours in every theme — a 4xx must never read as "success"
@@ -346,26 +369,26 @@
     --sig-neutral: var(--fg-muted);
     --sig-neutral-bg: var(--surface-2);
 
-    /* The reference column is dark in every palette and both appearances —
-       same trick as the sidebar, a white-alpha scale over a dark base — so
-       code samples never change contrast when the theme does. */
-    --ref-bg: var(--code-bg);
-    --ref-surface: rgba(255, 255, 255, 0.05);
-    --ref-fg: #ffffff;
-    --ref-fg-muted: rgba(255, 255, 255, 0.74);
-    --ref-fg-subtle: rgba(255, 255, 255, 0.46);
-    --ref-border: rgba(255, 255, 255, 0.12);
+    --ref-bg: var(--surface);
+    --ref-surface: var(--surface);
+    --ref-fg: var(--fg);
+    --ref-fg-muted: var(--fg-muted);
+    --ref-fg-subtle: var(--fg-subtle);
+    --ref-border: var(--border);
 
-    /* Code panels use a dark background in the light palettes too, so one
-       token set covers both appearances. */
-    --tok-key: #7dd3fc;
-    --tok-str: #86efac;
-    --tok-num: #fbbf24;
-    --tok-lit: #c4b5fd;
-    --tok-punct: rgba(255, 255, 255, 0.40);
-    --tok-cmd: #86efac;
-    --tok-flag: #7dd3fc;
-    --tok-url: #fbbf24;
+    /* Code sits on the muted surface with a hairline border, the way the
+       panel renders its <pre> blocks. */
+    --code-bg: var(--surface-2);
+    --code-fg: var(--fg);
+
+    --tok-key: #1d4ed8;
+    --tok-str: #15803d;
+    --tok-num: #b45309;
+    --tok-lit: #7c3aed;
+    --tok-punct: #94a3b8;
+    --tok-cmd: #0f766e;
+    --tok-flag: #4338ca;
+    --tok-url: #b45309;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -378,6 +401,15 @@
       --sig-warn-bg: rgba(245, 158, 11, 0.20);
       --sig-err: #f87171;
       --sig-err-bg: rgba(239, 68, 68, 0.18);
+
+      --tok-key: #7dd3fc;
+      --tok-str: #86efac;
+      --tok-num: #fbbf24;
+      --tok-lit: #c4b5fd;
+      --tok-punct: rgba(255, 255, 255, 0.38);
+      --tok-cmd: #86efac;
+      --tok-flag: #7dd3fc;
+      --tok-url: #fbbf24;
     }
   }
 
@@ -417,11 +449,6 @@
     border-radius: 3px;
   }
 
-  .sidebar :focus-visible,
-  .doc-panel-ref :focus-visible,
-  .code-block :focus-visible {
-    outline-color: rgba(255, 255, 255, 0.85);
-  }
 }
 
 @layer components {
@@ -444,8 +471,8 @@
   .sidebar {
     @apply fixed left-0 top-0 z-40 h-screen w-[212px] max-w-[82vw] overflow-y-auto px-3.5 py-6;
     color: var(--sidebar-fg);
-    background: var(--sidebar-solid);
-    border-right: 1px solid rgba(255,255,255,0.07);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
     transform: translateX(-100%);
     transition: transform 0.24s ease;
   }
@@ -505,9 +532,8 @@
   .brand-mark {
     @apply flex h-9 w-9 items-center justify-center rounded-xl;
     color: var(--sidebar-fg-muted);
-    background: rgba(255,255,255,0.14);
-    border: 1px solid rgba(255,255,255,0.22);
-    backdrop-filter: blur(6px);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
 
   .brand-logo {
@@ -532,7 +558,7 @@
 
   .nav-group {
     @apply pb-2;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid var(--border);
     margin-bottom: 4px;
   }
 
@@ -548,7 +574,7 @@
 
   .sidebar-section {
     @apply pt-5;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid var(--border);
   }
 
   .sidebar-section-title {
@@ -780,7 +806,7 @@
   /* Slate's split: prose reads as plain page, the reference column is a dark
      slab so code is always on dark no matter which palette is active. */
   .doc-panel {
-    @apply rounded-xl p-5;
+    @apply rounded-lg p-5;
     overflow: hidden;
   }
 
@@ -790,7 +816,7 @@
     @apply px-6 py-5;
     background: var(--surface);
     border: 1px solid var(--border);
-    box-shadow: none;
+    box-shadow: var(--card-shadow);
   }
 
   .doc-panel-ref {
@@ -798,17 +824,12 @@
     color: var(--ref-fg-muted);
     background: var(--ref-bg);
     border: 1px solid var(--ref-border);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    box-shadow: var(--card-shadow);
 
     /* Signal colours are re-pointed to their bright variants here: this
        column is dark in light mode too, so the light-mode greens and reds
        would be unreadable on it. */
-    --sig-ok: #4ade80;
-    --sig-info: #7dd3fc;
-    --sig-warn: #fbbf24;
-    --sig-err: #f87171;
-    --sig-neutral: rgba(255,255,255,0.66);
-    --sig-neutral-bg: rgba(255,255,255,0.08);
+
   }
 
   .doc-panel-ref .panel-tabs {
@@ -821,7 +842,7 @@
 
   .doc-panel-ref .panel-tab:hover:not(.panel-tab-active) {
     color: var(--ref-fg);
-    background: rgba(255,255,255,0.08);
+    background: var(--surface-2);
   }
 
   /* Needs the same specificity as the rule above, or `.doc-panel-ref
@@ -854,18 +875,18 @@
 
   .doc-panel-ref .markdown thead,
   .doc-panel-ref .markdown tbody tr:hover {
-    background: rgba(255,255,255,0.05);
+    background: var(--surface-2);
   }
 
   .doc-panel-ref .markdown code {
-    color: var(--ref-fg);
-    background: rgba(255,255,255,0.10);
+    color: var(--accent-ink);
+    background: var(--accent-soft);
   }
 
   /* Code inside the dark column sinks rather than floats. */
   .doc-panel-ref .markdown pre {
-    background: rgba(0,0,0,0.32);
-    border-color: var(--ref-border);
+    background: var(--code-bg);
+    border-color: var(--border);
     box-shadow: none;
   }
 
@@ -888,13 +909,13 @@
   }
 
   .doc-panel-ref .api-path {
-    color: var(--ref-fg);
-    background: rgba(255,255,255,0.10);
+    color: var(--accent-ink);
+    background: var(--accent-soft);
   }
 
   .doc-panel-ref .code-block {
-    background: rgba(0,0,0,0.32);
-    border-color: var(--ref-border);
+    background: var(--code-bg);
+    border-color: var(--border);
   }
 
   .panel-title {
@@ -963,11 +984,9 @@
   }
 
   .nav-link-active {
-    color: var(--sidebar-fg);
+    color: var(--accent-ink);
     font-weight: 500;
     background: var(--sidebar-active);
-    border-left: 2px solid rgba(255,255,255,0.6);
-    padding-left: calc(0.625rem - 2px);
   }
 
   /* ─── Language pills ────────────────────────────────────── */
@@ -975,20 +994,20 @@
   .lang-pill {
     @apply rounded-full px-3.5 py-1 text-[10.5px] font-semibold tracking-[0.06em] uppercase transition;
     color: var(--sidebar-fg-muted);
-    border: 1px solid rgba(255,255,255,0.18);
-    background: var(--sidebar-field);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
   }
 
   .lang-pill:hover {
-    border-color: rgba(255,255,255,0.45);
+    border-color: var(--border-strong);
     color: var(--sidebar-fg);
   }
 
   .lang-pill-active {
-    background: white;
-    border-color: white;
-    color: var(--sidebar-pill-ink);
-    font-weight: 700;
+    background: var(--accent-soft);
+    border-color: var(--accent-mid);
+    color: var(--accent-ink);
+    font-weight: 600;
   }
 
   /* ─── Markdown content ──────────────────────────────────── */
@@ -1085,15 +1104,15 @@
   .markdown pre {
     margin-top: 1.25rem;
     overflow-x: auto;
-    border-radius: 12px;
+    border-radius: 8px;
     background: var(--code-bg);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
     padding: 1.125rem 1.25rem;
     font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
     font-size: 12.5px;
     line-height: 1.75;
     color: var(--code-fg);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    box-shadow: none;
   }
 
   .markdown code {
@@ -1167,7 +1186,7 @@
 
   .nav-toc {
     @apply mb-1 mt-0.5 flex flex-col gap-0.5 pl-3;
-    border-left: 1px solid rgba(255,255,255,0.16);
+    border-left: 1px solid var(--border);
     margin-left: 0.625rem;
   }
 
@@ -1185,10 +1204,10 @@
      inset shadow rather than a border so switching sections never reflows
      the list by 2px. */
   .nav-toc-link-active {
-    color: var(--sidebar-fg);
+    color: var(--accent-ink);
     font-weight: 500;
     background: var(--sidebar-active);
-    box-shadow: inset 2px 0 0 rgba(255,255,255,0.6);
+    box-shadow: inset 2px 0 0 var(--accent-mid);
   }
 
   .nav-toc-l3 {
@@ -1198,33 +1217,34 @@
   /* ─── Code block chrome ─────────────────────────────────── */
 
   .code-block {
-    @apply relative mt-3 overflow-hidden rounded-xl;
+    @apply relative mt-2.5 overflow-hidden rounded-lg;
     background: var(--code-bg);
     border: 1px solid var(--border);
   }
 
   .code-bar {
     @apply flex items-center justify-between px-3 py-1.5;
-    background: rgba(255,255,255,0.045);
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    background: transparent;
+    border-bottom: 1px solid var(--border);
   }
 
   .code-lang {
     @apply text-[10px] font-semibold uppercase tracking-[0.07em];
-    color: rgba(255,255,255,0.42);
+    color: var(--fg-subtle);
   }
 
   .copy-btn {
     @apply rounded-md px-2 py-1 text-[10.5px] font-medium transition;
-    color: rgba(255,255,255,0.55);
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.10);
+    color: var(--fg-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
     cursor: pointer;
   }
 
   .copy-btn:hover {
-    color: #ffffff;
-    background: rgba(255,255,255,0.15);
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    border-color: var(--accent-mid);
   }
 
   .copy-btn-done {
@@ -1286,9 +1306,9 @@
   }
 
   .api-block {
-    @apply rounded-xl p-3.5;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
+    @apply p-0;
+    background: transparent;
+    border: none;
   }
 
   .api-block-head {
