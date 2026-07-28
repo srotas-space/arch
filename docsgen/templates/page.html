@@ -7,159 +7,395 @@
     <link rel="stylesheet" href="/assets/app.css">
   </head>
   <body>
-    <div class="relative min-h-screen overflow-x-hidden">
-      <div class="relative flex w-full flex-col gap-0 px-0 py-0 lg:flex-row">
-        <aside class="sidebar">
-          <a class="sidebar-brand" href="/">
-            <div class="brand-mark">
-              {% if site_logo is defined %}
-                <img src="{{ site_logo }}" alt="Site logo" class="brand-logo">
-              {% else %}
-                <img src="https://srotas-suite-space.s3.ap-south-1.amazonaws.com/sqrush.png" alt="Site logo" class="brand-logo">
-              {% endif %}
-            </div>
-            <div>
-              <div class="brand-title">{{ site_title }}</div>
-              <div class="brand-subtitle">
-                {% if site_subtitle is defined %}{{ site_subtitle }}{% else %}Arch doc{% endif %}
-              </div>
-            </div>
-          </a>
-
-          <div class="sidebar-search">
-            <input id="searchInput" class="search-input" type="text" placeholder="Search docs...">
-            <div id="searchResults" class="search-results"></div>
+    <a class="skip-link" href="#description">Skip to content</a>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <a class="sidebar-brand" href="/">
+          <div class="brand-mark">
+            <img src="{% if site_logo is defined %}{{ site_logo }}{% else %}/assets/logo.png{% endif %}"
+                 alt="{{ site_title }}" class="brand-logo">
           </div>
-
-          <div class="sidebar-nav">
-            {% if nav_groups | length > 0 %}
-              {% for group in nav_groups %}
-                <details class="nav-group" {% if group.open %}open{% endif %}>
-                  <summary class="nav-group-title">{{ group.title }}</summary>
-                  <div class="nav-group-items">
-                    {% for page in group.items %}
-                      <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}">
-                        {{ page.title }}
-                      </a>
-                    {% endfor %}
-                  </div>
-                </details>
-              {% endfor %}
+          <div class="brand-text">
+            <div class="brand-title" title="{{ site_title }}">{{ site_title }}</div>
+            {% if site_subtitle is defined %}
+              <div class="brand-subtitle" title="{{ site_subtitle }}">{{ site_subtitle }}</div>
             {% else %}
-              {% for page in nav_pages %}
-                <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}">
-                  {{ page.title }}
-                </a>
-              {% endfor %}
+              <div class="brand-subtitle">Arch doc</div>
             {% endif %}
           </div>
+        </a>
 
-          <div class="sidebar-section">
-            <p class="sidebar-section-title">Languages</p>
-            <div class="sidebar-pills">
-              {% for lang_item in langs %}
-                <a class="lang-pill {% if lang_item.code == lang %}lang-pill-active{% endif %}" href="/{{ lang_item.code }}/">
-                  {{ lang_item.code | upper }}
-                </a>
-              {% endfor %}
-            </div>
+        <nav class="sidebar-nav">
+          {% if nav_groups | length > 0 %}
+            {% for group in nav_groups %}
+              <details class="nav-group" {% if group.open %}open{% endif %}>
+                <summary class="nav-group-title" title="{{ group.title }}">{{ group.title }}</summary>
+                <div class="nav-group-items">
+                  {% for page in group.items %}
+                    <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}" title="{{ page.title }}">
+                      {{ page.title }}
+                    </a>
+                    {% if page.url == current_url and toc | length > 1 %}
+                      <div class="nav-toc">
+                        {% for item in toc %}
+                          <a class="nav-toc-link nav-toc-l{{ item.level }}" href="#{{ item.id }}" title="{{ item.title }}">{{ item.title }}</a>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </details>
+            {% endfor %}
+          {% else %}
+            {% for page in nav_pages %}
+              <a class="nav-link {% if page.url == current_url %}nav-link-active{% endif %}" href="{{ page.url }}" title="{{ page.title }}">
+                {{ page.title }}
+              </a>
+              {% if page.url == current_url and toc | length > 1 %}
+                <div class="nav-toc">
+                  {% for item in toc %}
+                    <a class="nav-toc-link nav-toc-l{{ item.level }}" href="#{{ item.id }}" title="{{ item.title }}">{{ item.title }}</a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </nav>
+
+        <div class="sidebar-section">
+          <p class="sidebar-section-title">Languages</p>
+          <div class="sidebar-pills">
+            {% for lang_item in langs %}
+              <a class="lang-pill {% if lang_item.code == lang %}lang-pill-active{% endif %}" href="/{{ lang_item.code }}/">
+                {{ lang_item.code | upper }}
+              </a>
+            {% endfor %}
           </div>
-        </aside>
+        </div>
+      </aside>
+      <div class="sidebar-scrim" id="sidebarScrim"></div>
 
-        <main class="main">
-          <div class="main-top">
-            <div class="main-title">
-              <h2>{{ page_title }} ({{ lang | upper }})</h2>
-            </div>
+      <main class="main">
+        <header class="topbar">
+          <button class="nav-toggle" id="navToggle" type="button" aria-label="Open navigation" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="/{{ lang }}/">{{ site_title }}</a>
+            {% if breadcrumb is defined %}
+              <span class="breadcrumb-sep">/</span>
+              <span>{{ breadcrumb }}</span>
+            {% endif %}
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">{{ page_title }}</span>
+          </nav>
+
+          <div class="topbar-search">
+            <input id="searchInput" class="search-input" type="text" placeholder="Search docs" autocomplete="off"
+                   role="combobox" aria-expanded="false" aria-controls="searchResults">
+            <kbd class="search-kbd">⌘K</kbd>
+            <div id="searchResults" class="search-results" role="listbox"></div>
+          </div>
+        </header>
+
+        <div class="main-inner">
+          <div class="page-head">
+            {% if breadcrumb is defined %}<p class="page-eyebrow">{{ breadcrumb }}</p>{% endif %}
+            <h1 class="page-title">{{ page_title }}</h1>
           </div>
 
           {% set has_arch = architecture_html | trim | length > 0 or architecture_json_html | trim | length > 0 or architecture_text_html | trim | length > 0 %}
           <div class="doc-split{% if not has_arch %} doc-split-full{% endif %}">
-            <section class="doc-panel">
+            <section class="doc-panel doc-panel-prose">
               <div id="description" class="markdown panel-body">
                 {{ description_html | safe }}
               </div>
             </section>
+
             {% if has_arch %}
-            <section class="doc-panel">
-              <div class="panel-tabs">
-                <button class="panel-tab panel-tab-active" data-arch-tab="arch" type="button">Arch</button>
-                <button class="panel-tab" data-arch-tab="json" type="button">JSON</button>
-                <button class="panel-tab" data-arch-tab="text" type="button">Text</button>
+            <section class="doc-panel doc-panel-ref">
+              <div class="panel-tabs" role="tablist" aria-label="Reference view">
+                <button class="panel-tab panel-tab-active" data-arch-tab="arch" role="tab" type="button"
+                        id="tab-arch" aria-controls="pane-arch" aria-selected="true" tabindex="0">Arch</button>
+                <button class="panel-tab" data-arch-tab="json" role="tab" type="button"
+                        id="tab-json" aria-controls="pane-json" aria-selected="false" tabindex="-1">
+                  {% if api_blocks | length > 0 %}API{% else %}JSON{% endif %}
+                </button>
+                <button class="panel-tab" data-arch-tab="text" role="tab" type="button"
+                        id="tab-text" aria-controls="pane-text" aria-selected="false" tabindex="-1">Text</button>
               </div>
-              <div class="panel-pane markdown panel-pane-active" data-arch-pane="arch">
+
+              <div class="panel-pane markdown panel-pane-active" data-arch-pane="arch"
+                   id="pane-arch" role="tabpanel" aria-labelledby="tab-arch" tabindex="0">
                 {{ architecture_html | safe }}
               </div>
-              <div class="panel-pane markdown" data-arch-pane="json">
-                {{ architecture_json_html | safe }}
+
+              <div class="panel-pane" data-arch-pane="json"
+                   id="pane-json" role="tabpanel" aria-labelledby="tab-json" tabindex="0">
+                {% if api_blocks | length > 0 %}
+                  <div class="api-blocks">
+                    {% for block in api_blocks %}
+                      <article class="api-block api-block-{{ block.kind }}">
+                        <header class="api-block-head">
+                          <div class="api-block-id">
+                            {% if block.method %}
+                              <span class="api-method api-method-{{ block.method | lower }}">{{ block.method }}</span>
+                            {% endif %}
+                            {% if block.status %}
+                              <span class="api-status api-status-{{ block.status_class }}">{{ block.status }}</span>
+                            {% endif %}
+                            <span class="api-block-label">{{ block.label }}</span>
+                            {% if block.generated %}
+                              <span class="api-generated" title="Derived from the request block">auto</span>
+                            {% endif %}
+                          </div>
+                          {% if block.path %}<code class="api-path">{{ block.path }}</code>{% endif %}
+                        </header>
+                        {% if block.note %}<p class="api-note">{{ block.note }}</p>{% endif %}
+                        <div class="code-block">
+                          <div class="code-bar">
+                            <span class="code-lang">{{ block.lang }}</span>
+                            <button class="copy-btn" type="button" data-copy>Copy</button>
+                          </div>
+                          <pre><code>{{ block.code_html | safe }}</code></pre>
+                        </div>
+                      </article>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="markdown">{{ architecture_json_html | safe }}</div>
+                {% endif %}
               </div>
-              <div class="panel-pane markdown" data-arch-pane="text">
+
+              <div class="panel-pane markdown" data-arch-pane="text"
+                   id="pane-text" role="tabpanel" aria-labelledby="tab-text" tabindex="0">
                 {{ architecture_text_html | safe }}
               </div>
             </section>
             {% endif %}
           </div>
 
+          {% if prev_page is defined or next_page is defined %}
+          <nav class="pager" aria-label="Page navigation">
+            {% if prev_page is defined %}
+              <a class="pager-link pager-prev" href="{{ prev_page.url }}">
+                <span class="pager-dir">← Previous</span>
+                <strong class="pager-title">{{ prev_page.title }}</strong>
+              </a>
+            {% else %}<span></span>{% endif %}
+            {% if next_page is defined %}
+              <a class="pager-link pager-next" href="{{ next_page.url }}">
+                <span class="pager-dir">Next →</span>
+                <strong class="pager-title">{{ next_page.title }}</strong>
+              </a>
+            {% else %}<span></span>{% endif %}
+          </nav>
+          {% endif %}
+
           <footer class="main-footer">
-            <span>{% if site_footer is defined %}{{ site_footer }}{% else %}Arch by Srotas Space{% endif %}</span>
+            <span>{% if site_footer is defined %}{{ site_footer }}{% else %}Built with Arch{% endif %}</span>
             <span>Static export ready</span>
           </footer>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
+
     <script>
+      // ─── Architecture tabs ──────────────────────────────────────────────
       const tabButtons = document.querySelectorAll("[data-arch-tab]");
       const tabPanes = document.querySelectorAll("[data-arch-pane]");
-      const setArchTab = (key) => {
-        tabButtons.forEach((btn) => btn.classList.toggle("panel-tab-active", btn.dataset.archTab === key));
+      const setArchTab = (key, focus) => {
+        tabButtons.forEach((btn) => {
+          const on = btn.dataset.archTab === key;
+          btn.classList.toggle("panel-tab-active", on);
+          btn.setAttribute("aria-selected", String(on));
+          // Roving tabindex: one stop for the whole tablist, arrows move within.
+          btn.tabIndex = on ? 0 : -1;
+          if (on && focus) btn.focus();
+        });
         tabPanes.forEach((pane) => pane.classList.toggle("panel-pane-active", pane.dataset.archPane === key));
       };
-      tabButtons.forEach((btn) => {
-        btn.addEventListener("click", () => setArchTab(btn.dataset.archTab));
+      tabButtons.forEach((btn) => btn.addEventListener("click", () => setArchTab(btn.dataset.archTab)));
+
+      const tabList = [...tabButtons];
+      tabList.forEach((btn) => {
+        btn.addEventListener("keydown", (e) => {
+          const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+          if (step) {
+            e.preventDefault();
+            const next = tabList[(tabList.indexOf(btn) + step + tabList.length) % tabList.length];
+            setArchTab(next.dataset.archTab, true);
+          } else if (e.key === "Home" || e.key === "End") {
+            e.preventDefault();
+            setArchTab((e.key === "Home" ? tabList[0] : tabList[tabList.length - 1]).dataset.archTab, true);
+          }
+        });
       });
+
       setArchTab("arch");
 
+      // ─── Mobile navigation drawer ───────────────────────────────────────
+      const sidebar = document.getElementById("sidebar");
+      const scrim = document.getElementById("sidebarScrim");
+      const navToggle = document.getElementById("navToggle");
+      const setNav = (open) => {
+        sidebar.classList.toggle("sidebar-open", open);
+        scrim.classList.toggle("sidebar-scrim-open", open);
+        navToggle.setAttribute("aria-expanded", String(open));
+        document.body.classList.toggle("nav-locked", open);
+      };
+      navToggle.addEventListener("click", () => setNav(!sidebar.classList.contains("sidebar-open")));
+      scrim.addEventListener("click", () => setNav(false));
+      sidebar.addEventListener("click", (e) => {
+        if (e.target.closest("a")) setNav(false);
+      });
+
+      // ─── On this page: follow the scroll ────────────────────────────────
+      // Marks the section currently under the top bar, and keeps that entry
+      // visible by scrolling the sidebar only — never the page, which would
+      // fight the reader.
+      const targets = [...document.querySelectorAll(".nav-toc-link")]
+        .map((link) => ({ link, el: document.getElementById(decodeURIComponent(link.hash.slice(1))) }))
+        .filter((entry) => entry.el);
+
+      if (targets.length) {
+        let activeLink = null;
+        const setActive = (link) => {
+          if (link === activeLink) return;
+          if (activeLink) activeLink.classList.remove("nav-toc-link-active");
+          activeLink = link;
+          if (!link) return;
+          link.classList.add("nav-toc-link-active");
+
+          // The sidebar is the offset parent, so offsetTop is already
+          // measured against its own scroll box.
+          const top = link.offsetTop;
+          const bottom = top + link.offsetHeight;
+          if (top < sidebar.scrollTop) {
+            sidebar.scrollTop = top - 8;
+          } else if (bottom > sidebar.scrollTop + sidebar.clientHeight) {
+            sidebar.scrollTop = bottom - sidebar.clientHeight + 8;
+          }
+        };
+
+        const TOP_OFFSET = 96; // sticky top bar plus breathing room
+        const syncToc = () => {
+          const doc = document.documentElement;
+          // A short trailing section can never reach the offset line, so the
+          // last entry takes over once the page bottoms out.
+          if (window.scrollY + window.innerHeight >= doc.scrollHeight - 2) {
+            setActive(targets[targets.length - 1].link);
+            return;
+          }
+          let current = targets[0].link;
+          for (const entry of targets) {
+            if (entry.el.getBoundingClientRect().top > TOP_OFFSET) break;
+            current = entry.link;
+          }
+          setActive(current);
+        };
+
+        let queued = false;
+        const onScroll = () => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(() => {
+            syncToc();
+            queued = false;
+          });
+        };
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll, { passive: true });
+        syncToc();
+      }
+
+      // ─── Copy buttons ───────────────────────────────────────────────────
+      // Code inside the API cards ships with its own bar; every other <pre>
+      // (Arch tab, prose) gets one grafted on here so the behaviour is uniform.
+      document.querySelectorAll(".markdown pre").forEach((pre) => {
+        const wrap = document.createElement("div");
+        wrap.className = "code-block code-block-bare";
+        pre.parentNode.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "copy-btn copy-btn-float";
+        btn.textContent = "Copy";
+        btn.setAttribute("data-copy", "");
+        wrap.appendChild(btn);
+      });
+
+      document.addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-copy]");
+        if (!btn) return;
+        const block = btn.closest(".code-block");
+        const pre = block && block.querySelector("pre");
+        if (!pre) return;
+        try {
+          await navigator.clipboard.writeText(pre.innerText);
+          btn.textContent = "Copied";
+          btn.classList.add("copy-btn-done");
+        } catch (err) {
+          btn.textContent = "Failed";
+        }
+        setTimeout(() => {
+          btn.textContent = "Copy";
+          btn.classList.remove("copy-btn-done");
+        }, 1600);
+      });
+
+      // ─── Search ─────────────────────────────────────────────────────────
       const searchInput = document.getElementById("searchInput");
       const searchResults = document.getElementById("searchResults");
       let searchIndex = null;
+      let activeIndex = -1;
       const currentLang = "{{ lang }}";
 
+      const escapeHtml = (value) =>
+        value.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
       const renderResults = (items) => {
+        activeIndex = -1;
         if (!items.length) {
           searchResults.innerHTML = "";
           searchResults.classList.remove("search-results-open");
+          searchInput.setAttribute("aria-expanded", "false");
           return;
         }
-        const html = items
+        searchResults.innerHTML = items
           .map(
             (item) =>
-              `<a class="search-result" href="${item.url}">
-                <div class="search-result-title">${item.title}</div>
-              </a>`
+              `<a class="search-result" role="option" href="${item.url}">
+                 <div class="search-result-title">${escapeHtml(item.title)}</div>
+                 <div class="search-result-excerpt">${escapeHtml(item.excerpt || "")}</div>
+               </a>`
           )
           .join("");
-        searchResults.innerHTML = html;
         searchResults.classList.add("search-results-open");
+        searchInput.setAttribute("aria-expanded", "true");
+      };
+
+      const setActive = (delta) => {
+        const options = [...searchResults.querySelectorAll(".search-result")];
+        if (!options.length) return;
+        activeIndex = (activeIndex + delta + options.length) % options.length;
+        options.forEach((el, i) => el.classList.toggle("search-result-active", i === activeIndex));
+        options[activeIndex].scrollIntoView({ block: "nearest" });
       };
 
       const filterResults = (query) => {
         if (!searchIndex) return;
-        const tokens = query
-          .toLowerCase()
-          .split(/\s+/)
-          .filter(Boolean);
+        const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
         if (!tokens.length) {
           renderResults([]);
           return;
         }
         const items = searchIndex
           .filter((entry) => entry.lang === currentLang)
-          .filter((entry) =>
-            tokens.every((t) =>
-              `${entry.title} ${entry.content}`.toLowerCase().includes(t)
-            )
-          )
-          .slice(0, 4);
+          .filter((entry) => tokens.every((t) => `${entry.title} ${entry.content}`.toLowerCase().includes(t)))
+          .slice(0, 6);
         renderResults(items);
       };
 
@@ -176,10 +412,29 @@
           filterResults(value);
         });
 
-        document.addEventListener("click", (e) => {
-          if (!searchResults.contains(e.target) && e.target !== searchInput) {
+        searchInput.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowDown") { e.preventDefault(); setActive(1); }
+          else if (e.key === "ArrowUp") { e.preventDefault(); setActive(-1); }
+          else if (e.key === "Enter") {
+            const active = searchResults.querySelector(".search-result-active");
+            if (active) { e.preventDefault(); window.location.href = active.getAttribute("href"); }
+          } else if (e.key === "Escape") {
+            searchInput.value = "";
             renderResults([]);
+            searchInput.blur();
           }
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+          }
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!searchResults.contains(e.target) && e.target !== searchInput) renderResults([]);
         });
       }
     </script>

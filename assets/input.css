@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -46,6 +46,7 @@
     --code-fg: #c4b5fd;
 
     --sidebar-grad: linear-gradient(168deg, #3b0d9e 0%, #6f2cf0 30%, #8b5cf6 62%, #c2843a 100%);
+    --sidebar-solid: #1c1330;
     --sidebar-pill-ink: #4c1d95;
     --search-panel-bg: rgba(15, 8, 40, 0.88);
     --selection: rgba(139, 92, 246, 0.18);
@@ -76,6 +77,7 @@
     --code-fg: #a5e8ff;
 
     --sidebar-grad: linear-gradient(168deg, #082f49 0%, #0c4a6e 32%, #0369a1 64%, #14b8a6 100%);
+    --sidebar-solid: #0c2432;
     --sidebar-pill-ink: #0c4a6e;
     --search-panel-bg: rgba(6, 30, 44, 0.90);
     --selection: rgba(14, 165, 233, 0.20);
@@ -106,6 +108,7 @@
     --code-fg: #a7f3c4;
 
     --sidebar-grad: linear-gradient(168deg, #052e16 0%, #14532d 32%, #15803d 64%, #ca8a04 100%);
+    --sidebar-solid: #0d2317;
     --sidebar-pill-ink: #14532d;
     --search-panel-bg: rgba(5, 28, 16, 0.90);
     --selection: rgba(34, 197, 94, 0.20);
@@ -136,6 +139,7 @@
     --code-fg: #fdd0a8;
 
     --sidebar-grad: linear-gradient(168deg, #431407 0%, #7c2d12 32%, #c2410c 64%, #f59e0b 100%);
+    --sidebar-solid: #29160c;
     --sidebar-pill-ink: #7c2d12;
     --search-panel-bg: rgba(38, 17, 8, 0.90);
     --selection: rgba(249, 115, 22, 0.20);
@@ -166,6 +170,7 @@
     --code-fg: #cbd5e1;
 
     --sidebar-grad: linear-gradient(168deg, #0f172a 0%, #1e293b 35%, #334155 70%, #64748b 100%);
+    --sidebar-solid: #141b27;
     --sidebar-pill-ink: #1e293b;
     --search-panel-bg: rgba(12, 20, 34, 0.92);
     --selection: rgba(100, 116, 139, 0.22);
@@ -197,6 +202,7 @@
       --code-fg: #c4b5fd;
 
       --sidebar-grad: linear-gradient(168deg, #241056 0%, #3f1a91 34%, #5b30b3 68%, #8a6030 100%);
+      --sidebar-solid: #130e22;
       --sidebar-pill-ink: #2a1160;
       --search-panel-bg: rgba(10, 5, 26, 0.94);
       --selection: rgba(167, 139, 250, 0.26);
@@ -223,6 +229,7 @@
       --code-fg: #a5e8ff;
 
       --sidebar-grad: linear-gradient(168deg, #041f30 0%, #073349 34%, #075985 68%, #0d7f77 100%);
+      --sidebar-solid: #071923;
       --sidebar-pill-ink: #073349;
       --search-panel-bg: rgba(4, 20, 30, 0.94);
       --selection: rgba(56, 189, 248, 0.26);
@@ -249,6 +256,7 @@
       --code-fg: #a7f3c4;
 
       --sidebar-grad: linear-gradient(168deg, #04220f 0%, #0d3a1f 34%, #14602f 68%, #8a6b0c 100%);
+      --sidebar-solid: #08190f;
       --sidebar-pill-ink: #0d3a1f;
       --search-panel-bg: rgba(4, 20, 11, 0.94);
       --selection: rgba(74, 222, 128, 0.24);
@@ -275,6 +283,7 @@
       --code-fg: #fdd0a8;
 
       --sidebar-grad: linear-gradient(168deg, #2b0d04 0%, #5a2010 34%, #9a3412 68%, #b3790c 100%);
+      --sidebar-solid: #1c0f07;
       --sidebar-pill-ink: #5a2010;
       --search-panel-bg: rgba(20, 9, 4, 0.94);
       --selection: rgba(251, 146, 60, 0.26);
@@ -301,6 +310,7 @@
       --code-fg: #cbd5e1;
 
       --sidebar-grad: linear-gradient(168deg, #070c15 0%, #131c2b 35%, #24304a 70%, #3f5170 100%);
+      --sidebar-solid: #0c121b;
       --sidebar-pill-ink: #131c2b;
       --search-panel-bg: rgba(6, 11, 19, 0.94);
       --selection: rgba(148, 163, 184, 0.26);
@@ -321,11 +331,65 @@
     --sidebar-hover: rgba(255, 255, 255, 0.10);
     --sidebar-active: rgba(255, 255, 255, 0.15);
     --sidebar-field: rgba(255, 255, 255, 0.08);
+
+    /* HTTP verbs and status codes carry meaning, so they keep the same
+       colours in every theme — a 4xx must never read as "success"
+       because the palette happens to be green. */
+    --sig-ok: #15803d;
+    --sig-ok-bg: rgba(34, 197, 94, 0.13);
+    --sig-info: #1d4ed8;
+    --sig-info-bg: rgba(59, 130, 246, 0.13);
+    --sig-warn: #b45309;
+    --sig-warn-bg: rgba(245, 158, 11, 0.16);
+    --sig-err: #b91c1c;
+    --sig-err-bg: rgba(239, 68, 68, 0.13);
+    --sig-neutral: var(--fg-muted);
+    --sig-neutral-bg: var(--surface-2);
+
+    /* The reference column is dark in every palette and both appearances —
+       same trick as the sidebar, a white-alpha scale over a dark base — so
+       code samples never change contrast when the theme does. */
+    --ref-bg: var(--code-bg);
+    --ref-surface: rgba(255, 255, 255, 0.05);
+    --ref-fg: #ffffff;
+    --ref-fg-muted: rgba(255, 255, 255, 0.74);
+    --ref-fg-subtle: rgba(255, 255, 255, 0.46);
+    --ref-border: rgba(255, 255, 255, 0.12);
+
+    /* Code panels use a dark background in the light palettes too, so one
+       token set covers both appearances. */
+    --tok-key: #7dd3fc;
+    --tok-str: #86efac;
+    --tok-num: #fbbf24;
+    --tok-lit: #c4b5fd;
+    --tok-punct: rgba(255, 255, 255, 0.40);
+    --tok-cmd: #86efac;
+    --tok-flag: #7dd3fc;
+    --tok-url: #fbbf24;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sig-ok: #4ade80;
+      --sig-ok-bg: rgba(34, 197, 94, 0.18);
+      --sig-info: #60a5fa;
+      --sig-info-bg: rgba(59, 130, 246, 0.20);
+      --sig-warn: #fbbf24;
+      --sig-warn-bg: rgba(245, 158, 11, 0.20);
+      --sig-err: #f87171;
+      --sig-err-bg: rgba(239, 68, 68, 0.18);
+    }
   }
 
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
@@ -334,16 +398,29 @@
     line-height: 1.65;
     color: var(--fg);
     background-color: var(--bg);
-    background-image: radial-gradient(circle at 1px 1px, var(--bg-dot) 1px, transparent 0);
-    background-size: 28px 28px;
   }
 
   .font-serif {
-    font-family: "Fraunces", "Times New Roman", serif;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   }
 
   ::selection {
     background: var(--selection);
+  }
+
+  /* Keyboard users get a visible ring everywhere; mouse users never see it.
+     The dark rail and reference column need a light ring instead of the
+     accent, which can sit too close to their background. */
+  :focus-visible {
+    outline: 2px solid var(--accent-mid);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  .sidebar :focus-visible,
+  .doc-panel-ref :focus-visible,
+  .code-block :focus-visible {
+    outline-color: rgba(255, 255, 255, 0.85);
   }
 }
 
@@ -358,16 +435,71 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
   }
 
+  /* Below `lg` the sidebar is an off-canvas drawer; from `lg` up it is the
+     fixed rail the main column is inset against. */
+  .layout {
+    @apply relative flex min-h-screen w-full flex-col lg:flex-row;
+  }
+
   .sidebar {
-    @apply w-full px-5 py-7 lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-[232px] lg:overflow-y-auto;
+    @apply fixed left-0 top-0 z-40 h-screen w-[212px] max-w-[82vw] overflow-y-auto px-3.5 py-6;
     color: var(--sidebar-fg);
-    background: var(--sidebar-grad);
+    background: var(--sidebar-solid);
     border-right: 1px solid rgba(255,255,255,0.07);
+    transform: translateX(-100%);
+    transition: transform 0.24s ease;
+  }
+
+  .sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-scrim {
+    @apply fixed inset-0 z-30 hidden;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  .sidebar-scrim-open {
+    @apply block;
+  }
+
+  @media (min-width: 1024px) {
+    .sidebar {
+      transform: none;
+      max-width: none;
+    }
+
+    .sidebar-scrim,
+    .sidebar-scrim-open {
+      display: none;
+    }
+  }
+
+  .nav-locked {
+    overflow: hidden;
+  }
+
+  .nav-toggle {
+    @apply flex h-9 w-9 shrink-0 flex-col items-center justify-center gap-[3px] rounded-lg lg:hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .nav-toggle span {
+    @apply block h-[1.5px] w-4 rounded-full;
+    background: var(--fg-muted);
   }
 
   .sidebar-brand {
-    @apply mb-7 flex items-center gap-3 pb-5;
+    @apply mb-5 flex min-w-0 items-center gap-2.5 pb-4;
     border-bottom: 1px solid var(--sidebar-border);
+  }
+
+  /* The text half of the brand must be allowed to shrink, or the flex row
+     refuses to let it ellipsise at all. */
+  .brand-text {
+    @apply min-w-0 flex-1;
   }
 
   .brand-mark {
@@ -383,13 +515,13 @@
   }
 
   .brand-title {
-    @apply text-[15px] font-semibold tracking-tight;
+    @apply truncate text-[14px] font-semibold tracking-tight;
     color: var(--sidebar-fg);
     letter-spacing: -0.01em;
   }
 
   .brand-subtitle {
-    @apply text-[11px] mt-0.5;
+    @apply mt-0.5 truncate text-[10.5px];
     color: var(--sidebar-fg-subtle);
     letter-spacing: 0.02em;
   }
@@ -405,9 +537,9 @@
   }
 
   .nav-group-title {
-    @apply cursor-pointer list-none py-2 pl-2.5 text-[10px] font-bold uppercase tracking-[0.32em];
+    @apply cursor-pointer list-none truncate py-2 pl-2.5 text-[10px] font-bold uppercase;
     color: var(--sidebar-fg-subtle);
-    letter-spacing: 0.3em;
+    letter-spacing: 0.08em;
   }
 
   .nav-group-items {
@@ -420,7 +552,7 @@
   }
 
   .sidebar-section-title {
-    @apply mb-3 text-[10px] uppercase tracking-[0.32em];
+    @apply mb-3 text-[10px] uppercase tracking-[0.08em];
     color: var(--sidebar-fg-subtle);
   }
 
@@ -428,32 +560,43 @@
     @apply flex flex-wrap gap-2;
   }
 
-  .sidebar-search {
-    @apply relative mb-7 mt-1;
+  /* ─── Search (top bar) ─────────────────────────────────── */
+
+  .topbar-search {
+    @apply relative ml-auto w-full max-w-[300px] shrink;
   }
 
   .search-input {
-    @apply w-full rounded-xl border px-3.5 py-2.5 text-[12.5px] focus:outline-none;
-    color: var(--sidebar-fg);
-    background: var(--sidebar-field);
-    border-color: rgba(255,255,255,0.14);
-    transition: border-color 0.15s, background 0.15s;
+    @apply w-full rounded-lg border py-2 pl-3 pr-12 text-[12.5px] focus:outline-none;
+    color: var(--fg);
+    background: var(--surface);
+    border-color: var(--border);
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
 
   .search-input::placeholder {
-    color: var(--sidebar-fg-subtle);
+    color: var(--fg-subtle);
   }
 
   .search-input:focus {
-    background: rgba(255,255,255,0.13);
-    border-color: rgba(255,255,255,0.32);
+    border-color: var(--accent-mid);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .search-kbd {
+    @apply pointer-events-none absolute right-2 top-1/2 rounded px-1.5 py-0.5 text-[10px] font-medium;
+    transform: translateY(-50%);
+    color: var(--fg-subtle);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
 
   .search-results {
-    @apply absolute left-0 right-0 top-full mt-2 hidden max-h-40 flex-col gap-1 overflow-auto rounded-xl p-1.5 backdrop-blur;
-    background: var(--search-panel-bg);
-    border: 1px solid rgba(255,255,255,0.12);
-    z-index: 50;
+    @apply absolute left-0 right-0 top-full mt-2 hidden max-h-80 flex-col gap-0.5 overflow-auto rounded-xl p-1.5;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+    z-index: 60;
   }
 
   .search-results-open {
@@ -461,55 +604,132 @@
   }
 
   .search-result {
-    @apply rounded-lg px-3 py-2.5 transition;
-    color: var(--sidebar-fg-muted);
+    @apply block rounded-lg px-3 py-2 transition;
+    color: var(--fg-muted);
     background: transparent;
   }
 
-  .search-result:hover {
-    background: var(--sidebar-hover);
-    color: var(--sidebar-fg);
+  .search-result:hover,
+  .search-result-active {
+    background: var(--accent-soft);
   }
 
   .search-result-title {
-    @apply text-[12px] font-medium truncate;
+    @apply truncate text-[12.5px] font-medium;
+    color: var(--fg);
+  }
+
+  .search-result-excerpt {
+    @apply truncate text-[11px];
+    color: var(--fg-subtle);
   }
 
   /* ─── Main ─────────────────────────────────────────────── */
 
   .main {
-    @apply flex-1 px-5 py-8 lg:ml-[232px] lg:min-h-screen lg:px-8 lg:py-10;
+    @apply w-full flex-1 lg:ml-[212px] lg:min-h-screen;
+    min-width: 0;
   }
 
-  .main-top {
-    @apply flex flex-col gap-3 pb-6 md:flex-row md:items-end md:justify-between;
+  .topbar {
+    @apply sticky top-0 z-20 flex items-center gap-3 px-5 py-2.5 lg:px-8;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
   }
 
-  .main-title h2 {
-    font-family: "Fraunces", serif;
-    font-size: 2rem;
+  .breadcrumb {
+    @apply hidden min-w-0 flex-1 items-center gap-2 text-[12px] sm:flex;
+    color: var(--fg-subtle);
+  }
+
+  .breadcrumb a {
+    color: var(--fg-muted);
+    transition: color 0.15s;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--accent-from);
+  }
+
+  .breadcrumb-sep {
+    color: var(--fg-subtle);
+    opacity: 0.6;
+  }
+
+  .breadcrumb-current {
+    @apply truncate font-medium;
+    color: var(--fg);
+  }
+
+  .main-inner {
+    @apply px-5 py-5 lg:px-8 lg:py-6;
+  }
+
+  /* The eyebrow sits on the same line as nothing else, so the whole header
+     block is kept to roughly two lines of height. */
+  .page-head {
+    @apply pb-3.5;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-eyebrow {
+    @apply mb-0.5 text-[10px] font-semibold uppercase tracking-[0.08em];
+    color: var(--accent-from);
+  }
+
+  .page-title {
+    font-size: 1.65rem;
     font-weight: 700;
-    line-height: 1.18;
-    letter-spacing: -0.025em;
-    background: var(--accent-grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    line-height: 1.12;
+    letter-spacing: -0.026em;
+    color: var(--fg);
   }
 
   .main-footer {
-    @apply mt-8 flex items-center justify-between text-[11.5px];
+    @apply mt-8 flex items-center justify-between pt-5 text-[11.5px];
     color: var(--fg-subtle);
     letter-spacing: 0.01em;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── Prev / next pager ─────────────────────────────────── */
+
+  .pager {
+    @apply mt-9 grid gap-3 sm:grid-cols-2;
+  }
+
+  .pager-link {
+    @apply flex flex-col gap-1 rounded-xl px-4 py-3 transition;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .pager-link:hover {
+    border-color: var(--accent-mid);
+    background: var(--surface-2);
+  }
+
+  .pager-next {
+    @apply items-end text-right;
+  }
+
+  .pager-dir {
+    @apply text-[10.5px] font-semibold uppercase tracking-[0.07em];
+    color: var(--fg-subtle);
+  }
+
+  .pager-title {
+    @apply text-[13.5px] font-medium;
+    color: var(--fg);
   }
 
   /* ─── Doc split ─────────────────────────────────────────── */
 
   .doc-split {
-    @apply mt-7 grid gap-4;
+    @apply mt-5 grid gap-5;
     grid-template-columns: minmax(0, 1fr);
-    max-width: 1380px;
+    max-width: 1440px;
   }
 
   .doc-split-full {
@@ -529,16 +749,16 @@
     }
   }
 
-  /* Two equal, fixed-width columns -- `minmax(0, 1fr)` on both tracks is
-     what keeps them locked at 50/50 regardless of content: without the
-     `0` minimum, a track sizes to its content's intrinsic width (e.g. a
-     long unwrapped ASCII-art line in the Arch tab), which is what let the
-     right panel balloon past its intended width before. Each panel's own
-     overflow (see `.panel-pane`/`.markdown pre` below) handles wide
-     content with an internal scrollbar instead. */
+  /* Prose 55 / reference 45. The `minmax(0, …)` minimum on both tracks is
+     what holds the ratio regardless of content: without the `0`, a track
+     sizes to its content's intrinsic width (e.g. a long unwrapped ASCII-art
+     line in the Arch tab), which is what let the right panel balloon past
+     its intended width before. Each panel's own overflow (see
+     `.panel-pane`/`.markdown pre` below) handles wide content with an
+     internal scrollbar instead. */
   @media (min-width: 900px) {
     .doc-split {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
       align-items: start;
     }
 
@@ -546,52 +766,177 @@
       min-width: 0;
     }
 
+    /* Offset by the sticky top bar so the reference panel never slides
+       under it. */
     .doc-split > .doc-panel:last-child {
       position: sticky;
-      top: 1.75rem;
-      max-height: calc(100vh - 3.5rem);
+      top: 4.5rem;
+      max-height: calc(100vh - 6rem);
       overflow-y: auto;
       overflow-x: hidden;
     }
   }
 
+  /* Slate's split: prose reads as plain page, the reference column is a dark
+     slab so code is always on dark no matter which palette is active. */
   .doc-panel {
-    @apply rounded-2xl p-6;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+    @apply rounded-xl p-5;
     overflow: hidden;
   }
 
+  /* Solid rather than transparent: prose sitting straight on the page's dot
+     grid is noticeably harder to read. Flat, though — no lifted-card shadow. */
+  .doc-panel-prose {
+    @apply px-6 py-5;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: none;
+  }
+
+  .doc-panel-ref {
+    @apply p-4;
+    color: var(--ref-fg-muted);
+    background: var(--ref-bg);
+    border: 1px solid var(--ref-border);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+
+    /* Signal colours are re-pointed to their bright variants here: this
+       column is dark in light mode too, so the light-mode greens and reds
+       would be unreadable on it. */
+    --sig-ok: #4ade80;
+    --sig-info: #7dd3fc;
+    --sig-warn: #fbbf24;
+    --sig-err: #f87171;
+    --sig-neutral: rgba(255,255,255,0.66);
+    --sig-neutral-bg: rgba(255,255,255,0.08);
+  }
+
+  .doc-panel-ref .panel-tabs {
+    border-bottom-color: var(--ref-border);
+  }
+
+  .doc-panel-ref .panel-tab {
+    color: var(--ref-fg-subtle);
+  }
+
+  .doc-panel-ref .panel-tab:hover:not(.panel-tab-active) {
+    color: var(--ref-fg);
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* Needs the same specificity as the rule above, or `.doc-panel-ref
+     .panel-tab` outranks the standalone `.panel-tab-active` and the selected
+     tab ends up dimmer than its neighbours. */
+  .doc-panel-ref .panel-tab-active {
+    color: var(--ref-fg);
+  }
+
+  .doc-panel-ref .markdown,
+  .doc-panel-ref .markdown p,
+  .doc-panel-ref .markdown ul,
+  .doc-panel-ref .markdown ol,
+  .doc-panel-ref .markdown td {
+    color: var(--ref-fg-muted);
+  }
+
+  .doc-panel-ref .markdown h1,
+  .doc-panel-ref .markdown h2,
+  .doc-panel-ref .markdown h3,
+  .doc-panel-ref .markdown th {
+    color: var(--ref-fg);
+  }
+
+  .doc-panel-ref .markdown table,
+  .doc-panel-ref .markdown th,
+  .doc-panel-ref .markdown td {
+    border-color: var(--ref-border);
+  }
+
+  .doc-panel-ref .markdown thead,
+  .doc-panel-ref .markdown tbody tr:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .doc-panel-ref .markdown code {
+    color: var(--ref-fg);
+    background: rgba(255,255,255,0.10);
+  }
+
+  /* Code inside the dark column sinks rather than floats. */
+  .doc-panel-ref .markdown pre {
+    background: rgba(0,0,0,0.32);
+    border-color: var(--ref-border);
+    box-shadow: none;
+  }
+
+  .doc-panel-ref .api-block {
+    background: var(--ref-surface);
+    border-color: var(--ref-border);
+  }
+
+  .doc-panel-ref .api-block-label {
+    color: var(--ref-fg);
+  }
+
+  .doc-panel-ref .api-note {
+    color: var(--ref-fg-subtle);
+  }
+
+  .doc-panel-ref .api-generated {
+    color: var(--ref-fg-subtle);
+    border-color: var(--ref-border);
+  }
+
+  .doc-panel-ref .api-path {
+    color: var(--ref-fg);
+    background: rgba(255,255,255,0.10);
+  }
+
+  .doc-panel-ref .code-block {
+    background: rgba(0,0,0,0.32);
+    border-color: var(--ref-border);
+  }
+
   .panel-title {
-    @apply text-[11px] font-semibold uppercase tracking-[0.28em];
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em];
     color: var(--fg-subtle);
   }
 
+  /* Nothing sits above the prose body, so it needs no leading offset — and
+     the first block inside it should not add one either. */
   .panel-body {
-    @apply mt-5;
+    @apply mt-0;
   }
 
+  .markdown > *:first-child {
+    margin-top: 0;
+  }
+
+  /* Underlined tabs rather than filled pills. A filled active tab needs
+     white-on-accent, and the accents go pale in the dark palettes — the
+     underline carries the same signal at any contrast. */
   .panel-tabs {
-    @apply flex items-center gap-1 pb-4;
+    @apply flex items-center gap-1;
     border-bottom: 1px solid var(--border);
   }
 
   .panel-tab {
-    @apply rounded-lg px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition cursor-pointer;
+    @apply cursor-pointer px-3 py-2 text-[12px] font-medium transition;
     color: var(--fg-subtle);
-    letter-spacing: 0.16em;
+    letter-spacing: 0.01em;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: transparent;
   }
 
   .panel-tab:hover:not(.panel-tab-active) {
-    background: var(--surface-2);
-    color: var(--fg-muted);
+    color: var(--fg);
   }
 
   .panel-tab-active {
-    color: white;
-    background: var(--accent-grad);
-    border-radius: 8px;
+    color: var(--fg);
+    background: transparent;
+    border-bottom-color: var(--accent-mid);
   }
 
   .panel-pane {
@@ -605,8 +950,10 @@
 
   /* ─── Nav links ─────────────────────────────────────────── */
 
+  /* Block rather than flex so a long page title ellipsises instead of
+     wrapping — the full text is on the element's `title` for hover. */
   .nav-link {
-    @apply flex items-center justify-between rounded-lg px-2.5 py-2 text-[12.5px] font-normal transition;
+    @apply block truncate rounded-lg px-2.5 py-2 text-[12.5px] font-normal transition;
     color: var(--sidebar-fg-muted);
   }
 
@@ -626,7 +973,7 @@
   /* ─── Language pills ────────────────────────────────────── */
 
   .lang-pill {
-    @apply rounded-full px-3.5 py-1 text-[10.5px] font-semibold tracking-[0.2em] uppercase transition;
+    @apply rounded-full px-3.5 py-1 text-[10.5px] font-semibold tracking-[0.06em] uppercase transition;
     color: var(--sidebar-fg-muted);
     border: 1px solid rgba(255,255,255,0.18);
     background: var(--sidebar-field);
@@ -647,17 +994,43 @@
   /* ─── Markdown content ──────────────────────────────────── */
 
   .markdown {
-    @apply text-[14.5px] leading-7;
+    @apply text-[15px];
+    line-height: 1.72;
     color: var(--fg-muted);
     overflow-wrap: anywhere;
+  }
+
+  /* Cap the measure on running text only. At the prose column's full width
+     a line runs past 100 characters, which is well beyond comfortable —
+     tables and code keep the whole column. */
+  .doc-panel-prose .markdown > p,
+  .doc-panel-prose .markdown > ul,
+  .doc-panel-prose .markdown > ol,
+  .doc-panel-prose .markdown > blockquote {
+    max-width: 74ch;
+  }
+
+  /* A skip link is the one piece of chrome that only exists for keyboard
+     and screen-reader users; it stays out of the layout until focused. */
+  .skip-link {
+    @apply absolute left-3 z-50 rounded-lg px-3 py-2 text-[12.5px] font-medium;
+    top: -100px;
+    color: var(--fg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: top 0.15s;
+  }
+
+  .skip-link:focus {
+    top: 0.75rem;
   }
 
   .markdown h1,
   .markdown h2,
   .markdown h3 {
-    font-family: "Fraunces", serif;
     color: var(--fg);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
+    font-weight: 600;
   }
 
   .markdown h1 {
@@ -769,6 +1142,244 @@
     background: var(--surface-2);
   }
 
+  /* ─── Heading anchors ───────────────────────────────────── */
+
+  .markdown h1,
+  .markdown h2,
+  .markdown h3 {
+    scroll-margin-top: 5.5rem;
+  }
+
+  .heading-anchor {
+    @apply ml-2 align-middle text-[0.72em] font-normal opacity-0 transition;
+    color: var(--fg-subtle);
+    text-decoration: none;
+  }
+
+  .markdown h1:hover .heading-anchor,
+  .markdown h2:hover .heading-anchor,
+  .markdown h3:hover .heading-anchor,
+  .heading-anchor:focus {
+    @apply opacity-100;
+  }
+
+  /* ─── On this page (nested under the active nav link) ───── */
+
+  .nav-toc {
+    @apply mb-1 mt-0.5 flex flex-col gap-0.5 pl-3;
+    border-left: 1px solid rgba(255,255,255,0.16);
+    margin-left: 0.625rem;
+  }
+
+  .nav-toc-link {
+    @apply truncate rounded-md px-2 py-1 text-[11.5px] transition;
+    color: var(--sidebar-fg-subtle);
+  }
+
+  .nav-toc-link:hover {
+    color: var(--sidebar-fg);
+    background: var(--sidebar-hover);
+  }
+
+  /* Same selected treatment as the parent page link. The accent bar is an
+     inset shadow rather than a border so switching sections never reflows
+     the list by 2px. */
+  .nav-toc-link-active {
+    color: var(--sidebar-fg);
+    font-weight: 500;
+    background: var(--sidebar-active);
+    box-shadow: inset 2px 0 0 rgba(255,255,255,0.6);
+  }
+
+  .nav-toc-l3 {
+    @apply pl-4;
+  }
+
+  /* ─── Code block chrome ─────────────────────────────────── */
+
+  .code-block {
+    @apply relative mt-3 overflow-hidden rounded-xl;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+  }
+
+  .code-bar {
+    @apply flex items-center justify-between px-3 py-1.5;
+    background: rgba(255,255,255,0.045);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .code-lang {
+    @apply text-[10px] font-semibold uppercase tracking-[0.07em];
+    color: rgba(255,255,255,0.42);
+  }
+
+  .copy-btn {
+    @apply rounded-md px-2 py-1 text-[10.5px] font-medium transition;
+    color: rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.10);
+    cursor: pointer;
+  }
+
+  .copy-btn:hover {
+    color: #ffffff;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .copy-btn-done {
+    color: var(--sig-ok);
+    border-color: var(--sig-ok);
+  }
+
+  /* Buttons grafted onto plain markdown <pre> blocks float over the code
+     instead of sitting in a bar, so the block keeps its full height. */
+  .copy-btn-float {
+    @apply absolute right-2.5 top-2.5 opacity-0;
+    z-index: 2;
+  }
+
+  .code-block:hover .copy-btn-float,
+  .copy-btn-float:focus {
+    @apply opacity-100;
+  }
+
+  /* The API cards render their own <pre>, outside `.markdown`, so the code
+     typography lives here rather than being inherited. */
+  .code-block:not(.code-block-bare) pre {
+    @apply overflow-auto;
+    margin: 0;
+    padding: 1rem 1.125rem;
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    font-size: 12.5px;
+    line-height: 1.72;
+    color: var(--code-fg);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    max-height: 26rem;
+  }
+
+  /* Browsers give bare <code> their own monospace default, which would
+     override the family set on the <pre>. */
+  .code-block pre code {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  /* Wrapper the copy button is grafted into around plain markdown code
+     blocks — it must stay invisible and let `.markdown pre` keep its look. */
+  .code-block-bare {
+    @apply mt-0 overflow-visible rounded-none;
+    background: transparent;
+    border: none;
+  }
+
+  /* ─── API blocks (JSON tab) ─────────────────────────────── */
+
+  .api-blocks {
+    @apply flex flex-col gap-4 pt-5;
+  }
+
+  .api-block {
+    @apply rounded-xl p-3.5;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+
+  .api-block-head {
+    @apply flex flex-wrap items-center gap-x-2.5 gap-y-1.5;
+  }
+
+  .api-block-id {
+    @apply flex min-w-0 flex-wrap items-center gap-2;
+  }
+
+  .api-block-label {
+    @apply text-[12.5px] font-semibold;
+    color: var(--fg);
+  }
+
+  .api-method,
+  .api-status {
+    @apply rounded-md px-2 py-[3px] text-[10px] font-bold uppercase tracking-[0.08em] leading-none;
+  }
+
+  .api-method {
+    color: var(--sig-info);
+    background: var(--sig-info-bg);
+  }
+
+  .api-method-post,
+  .api-method-put,
+  .api-method-patch {
+    color: var(--sig-ok);
+    background: var(--sig-ok-bg);
+  }
+
+  .api-method-delete {
+    color: var(--sig-err);
+    background: var(--sig-err-bg);
+  }
+
+  .api-status {
+    color: var(--sig-neutral);
+    background: var(--sig-neutral-bg);
+  }
+
+  .api-status-ok {
+    color: var(--sig-ok);
+    background: var(--sig-ok-bg);
+  }
+
+  .api-status-info {
+    color: var(--sig-info);
+    background: var(--sig-info-bg);
+  }
+
+  .api-status-warn {
+    color: var(--sig-warn);
+    background: var(--sig-warn-bg);
+  }
+
+  .api-status-err {
+    color: var(--sig-err);
+    background: var(--sig-err-bg);
+  }
+
+  .api-path {
+    @apply ml-auto truncate rounded-md px-2 py-[3px] text-[11.5px];
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+  }
+
+  .api-generated {
+    @apply rounded px-1.5 py-[2px] text-[9px] font-semibold uppercase tracking-[0.06em];
+    color: var(--fg-subtle);
+    border: 1px dashed var(--border);
+  }
+
+  .api-note {
+    @apply mt-2 text-[12.5px] leading-6;
+    color: var(--fg-muted);
+  }
+
+  /* ─── Code tokens ───────────────────────────────────────── */
+
+  .tok-key { color: var(--tok-key); }
+  .tok-str { color: var(--tok-str); }
+  .tok-num { color: var(--tok-num); }
+  .tok-lit { color: var(--tok-lit); font-style: italic; }
+  .tok-punct { color: var(--tok-punct); }
+  .tok-cmd { color: var(--tok-cmd); font-weight: 500; }
+  .tok-flag { color: var(--tok-flag); }
+  .tok-url { color: var(--tok-url); }
+
   /* ─── Env / cost cards ──────────────────────────────────── */
 
   .env-grid {
@@ -794,8 +1405,9 @@
   }
 
   .env-tag {
-    @apply rounded-full px-3.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white whitespace-nowrap leading-none shrink-0;
-    background: var(--accent-grad);
+    @apply rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] whitespace-nowrap leading-none shrink-0;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
   }
 
   .env-tag-test,
@@ -810,9 +1422,10 @@
   }
 
   .cost-chip {
-    @apply rounded-full px-3 py-1 text-[11px] font-medium text-white;
-    background: var(--accent-grad);
-    opacity: 0.88;
+    @apply rounded-md px-2.5 py-1 text-[11px] font-medium;
+    color: var(--fg-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
 
   .env-services {
@@ -831,7 +1444,7 @@
   }
 
   .stack-card h3 {
-    @apply font-serif text-xl;
+    @apply text-xl font-semibold;
     color: var(--fg);
   }
 
@@ -859,7 +1472,7 @@
   }
 
   .stack-head h3 {
-    @apply font-serif text-[18px];
+    @apply text-[18px] font-semibold;
     color: var(--fg);
     letter-spacing: -0.015em;
   }
@@ -891,7 +1504,7 @@
   }
 
   .lane-title {
-    @apply text-[10px] font-bold uppercase tracking-[0.32em];
+    @apply text-[10px] font-bold uppercase tracking-[0.08em];
     color: var(--fg-subtle);
   }
 
@@ -918,7 +1531,7 @@
   /* ─── Tabs (main-tabs) ──────────────────────────────────── */
 
   .main-tabs {
-    @apply flex items-center gap-1.5 text-[11px] uppercase tracking-[0.2em];
+    @apply flex items-center gap-1.5 text-[11px] uppercase tracking-[0.06em];
     color: var(--fg-subtle);
   }
 
@@ -928,8 +1541,9 @@
   }
 
   .tab-active {
-    @apply rounded-lg px-3 py-1.5 text-white;
-    background: var(--accent-grad);
+    @apply rounded-lg px-3 py-1.5;
+    color: var(--fg);
+    background: var(--surface-2);
   }
 }
 

@@ -1,6 +1,8 @@
 # Arch — Markdown to static documentation
 
-Write infrastructure and API docs in Markdown. A Rust generator compiles them into a clean, static HTML site with a split-panel layout, architecture tabs (Arch / JSON / Text), multi-language support, and full-text search. No backend, no database, no runtime.
+Write infrastructure and API docs in Markdown. A Rust generator compiles them into a clean, static HTML site with a split-panel layout, reference tabs (Arch / API / Text), request–response–curl cards, multi-language support, and full-text search. No backend, no database, no runtime.
+
+Reading chrome comes for free on every page: a sticky breadcrumb bar, `⌘K` search with arrow-key navigation, an "On this page" list nested under the current sidebar entry, hover anchors on every heading, copy buttons on every code block, previous/next paging, and a slide-over nav on mobile.
 
 ---
 
@@ -163,7 +165,7 @@ arch/
 
 Every page follows this structure:
 
-```md
+````md
 # Page Title
 
 ## Description
@@ -175,15 +177,82 @@ Short overview shown in the left panel.
 ASCII diagram or freeform text.
 
 ### JSON
-\`\`\`json
+```json
 { "key": "value" }
-\`\`\`
+```
 
 ### Text
 Plain prose explanation shown in the Text tab.
-```
+````
 
 The generator maps these headings to the split-panel UI automatically. Omitting `## Architecture` renders the description full-width.
+
+Any `##` section you write *after* `## Architecture` — a cost table, a stack grid — continues in the left column, and its `##`/`###` headings become the "On this page" list nested under the current page in the sidebar.
+
+---
+
+## API blocks — request, response, curl
+
+The `### JSON` tab renders one card per block when you give each block a `####` subheading. Each card gets its own header, verb and status badges, and copy button.
+
+````md
+### JSON
+
+#### Request POST /v1/resources
+
+Optional sentence of context, shown under the card header.
+
+```json
+{
+  "method": "POST",
+  "path": "/v1/resources",
+  "headers": { "Authorization": "Bearer sk_test_xxx" },
+  "body": { "name": "My first resource" }
+}
+```
+
+#### Response 201
+
+```json
+{ "id": "res_01hxyz", "status": "active" }
+```
+
+#### Response 403 — Not permitted
+
+```json
+{ "error": { "code": "forbidden" } }
+```
+````
+
+### Heading grammar
+
+`#### <kind> [METHOD] [/path] [status] [free text]` — every part after the kind is optional and order does not matter.
+
+| Kind | Renders as | Extras picked up |
+| --- | --- | --- |
+| `Request` / `Req` | Request card | HTTP verb badge, path chip |
+| `Response` / `Resp` | Response card | 3-digit status badge, coloured by class |
+| `Error` | Response card | same as above |
+| `cURL` / `bash` | Shell card | — |
+| anything else | Plain card titled with the heading | — |
+
+Free text becomes the card title (`Response 403 — Not permitted` → a `403` badge next to "Not permitted"). Without it the card falls back to the kind name. A verb and path can also be omitted from the heading and read from the JSON body's own `method` / `path` keys.
+
+### Generated curl
+
+If a request block names a `method` and `path` and you have not written a `#### cURL` block yourself, the generator writes one for you from the headers and body — marked `auto` in the card header. Set the host in `site.md`:
+
+```md
+api_base: https://api.yourservice.com
+```
+
+It defaults to `https://api.example.com`. An explicit `#### cURL` block always wins.
+
+### Pages written before this existed
+
+A `### JSON` section holding a single object with `request` / `response` / `*_error` keys is split on those keys into the same cards, so older pages get the layout without being rewritten. Anything else — a plain JSON object with no such keys — keeps rendering as one code block.
+
+JSON and shell samples are syntax-highlighted at build time, so the published site still ships no client-side highlighter.
 
 ---
 
@@ -192,12 +261,22 @@ The generator maps these headings to the split-panel UI automatically. Omitting 
 Create `docs/site.md` for global settings, or `docs/<lang>/site.md` for per-language overrides:
 
 ```md
-title: Srotas Space
-subtitle: Infra Arch
+title: Example API
+subtitle: Developer docs
 logo: /assets/logo.png
-footer: Arch by Srotas Space
+footer: Built with Arch
 theme: violet
+api_base: https://api.example.com
 ```
+
+| Key | Purpose |
+| --- | --- |
+| `title` | Site name in the sidebar, tab title, breadcrumb root |
+| `subtitle` | Small line under the site name |
+| `logo` | Path or URL to the brand mark |
+| `footer` | Footer text |
+| `theme` | One of the presets below |
+| `api_base` | Host used when generating curl samples |
 
 ---
 
@@ -208,10 +287,10 @@ theme: violet
 **Step 1** — open `docs/site.md` and set the `theme:` line to any theme from the table below:
 
 ```md
-title: Srotas Space
-subtitle: Infra Arch
+title: Example API
+subtitle: Developer docs
 logo: /assets/logo.png
-footer: Arch by Srotas Space
+footer: Built with Arch
 theme: ocean
 ```
 
@@ -307,21 +386,19 @@ Components reference these tokens, so changing a palette never means touching co
 Create `docs/<lang>/nav.md` to define a two-level grouped sidebar:
 
 ```md
-[Overview]
+[Getting started]
 - welcome.md
-- getting-started.md
+- authentication.md
 
-[Architecture]
-- architecture.md
+[API reference]
+- resources.md
+- errors.md
+- rate-limits.md
 
 [Infrastructure]
 - network.md
 - compute.md
 - data.md
-
-[Operations]
-- monitoring.md
-- incident-response.md
 ```
 
 Groups render as collapsible sections. Without a `nav.md`, pages are listed flat in filesystem order.

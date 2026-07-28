@@ -82,90 +82,68 @@ Below is the environment stack, service layout, and cost breakdown.
 ```
 Client
   |
-  |  (already accepted; synthetic order exists)
-  |
-  |----------------------------------------------|
-  |                                              |
-trading-core (Tier-1)                             |
-  |                                              |
-  |  cmd.venue.place.v1 (qty=3.0, attempt=EA-1)  |
+  |  POST /v1/resources
   |--------------------------------------------->|
   |                                              |
-venue-router-adapters (Tier-2)                    |
+Edge / CDN                                        |
   |                                              |
-  |  place order on venue                        |
+  |  TLS termination, WAF, rate limiting          |
   |--------------------------------------------->|
   |                                              |
-External Venue                                   |
+API gateway                                       |
   |                                              |
-  |  partial fill: 1.2 BTC @ 9980                |
+  |  authenticate, authorize, route               |
+  |--------------------------------------------->|
+  |                                              |
+Application service                               |
+  |                                              |
+  |  validate -> write -> emit event              |
   |---------------------------------------------|
   |                                              |
-venue-router-adapters                             |
+Primary datastore                                 |
   |                                              |
-  |  evt.venue.execution.report.v1               |
-  |  (filled=1.2, remaining=1.8, EA-1)           |
+  |  commit + outbox row                          |
   |--------------------------------------------->|
   |                                              |
-trading-core                                     |
+Message broker                                    |
   |                                              |
-  |  atomic FDB txn:                             |
-  |   - update synthetic order                  |
-  |   - ledger postings                         |
-  |   - position update                         |
-  |   - write outbox                            |
+  |  fan out to subscribers                       |
   |---------------------------------------------|
   |                                              |
-Outbox Publisher                                 |
-  |                                              |
-  |  publish evt.trading.*, evt.ledger.*         |
-  |--------------------------------------------->|
-  |                                              |
-Kafka                                            |
-  |                                              |
-  |  fanout                                      |
-  |---------------------------------------------|
-  |                                              |
-ws-gateway                  edge-api             |
+Workers                     Read replicas         |
   |                          |                   |
-  |  push deltas              | read snapshots   |
+  |  async side effects       | serve queries     |
   |-------------------------> |----------------->|
   |                                              |
-Client UI                                        |
+Client                                            |
   |                                              |
-  |  sees: 1.2 / 3 BTC filled                    |
-  |                                              |
+  |  201 Created + resource body                  |
   |----------------------------------------------|
-  |                                              |
-trading-core                                     |
-  |                                              |
-  |  cmd.venue.place.v1 (qty=1.8, attempt=EA-2)  |
-  |--------------------------------------------->|
-  |              (loop Steps 6 → 9)              |
-  |                                              |
 ```
 
 ### JSON
 
 ```json
 {
-  "flow": "order_lifecycle",
+  "flow": "write_request_lifecycle",
   "stages": [
-    { "name": "client", "event": "cmd.venue.place.v1", "qty": 3.0, "attempt": "EA-1" },
-    { "name": "venue", "event": "partial_fill", "filled": 1.2, "price": 9980 },
-    { "name": "trading_core", "event": "txn.commit", "updates": ["synthetic_order", "ledger", "position", "outbox"] },
-    { "name": "outbox", "event": "publish", "topics": ["evt.trading.*", "evt.ledger.*"] },
-    { "name": "client_ui", "event": "update", "filled": "1.2/3" }
+    { "name": "edge", "role": "tls_termination", "protects": ["waf", "rate_limit"] },
+    { "name": "gateway", "role": "auth", "checks": ["token", "scope"] },
+    { "name": "service", "role": "handle", "steps": ["validate", "persist", "emit"] },
+    { "name": "datastore", "role": "commit", "writes": ["record", "outbox"] },
+    { "name": "broker", "role": "fanout", "topics": ["resource.created"] },
+    { "name": "workers", "role": "async", "handles": ["indexing", "notifications"] }
   ]
 }
 ```
 
 ### Text
 
-The client places a synthetic order that is routed to a venue adapter. The venue returns a partial fill,
-trading-core commits an atomic transaction in FoundationDB, and the outbox publishes events to Kafka.
-Realtime deltas flow to the UI through ws-gateway, while edge-api serves snapshots. The remaining quantity
-is re-submitted as a second attempt until the order completes.
+A write enters through the edge, where TLS terminates and rate limiting applies.
+The gateway authenticates the caller and routes to the service, which validates
+the request, commits it alongside an outbox row, and returns. The outbox is
+published to the broker, where workers pick up asynchronous side effects and
+read replicas take query load off the primary.
 
 ## Cost breakdown by environment (daily / monthly)
 

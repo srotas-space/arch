@@ -1,12 +1,8 @@
-[Overview]
+[Getting started]
 - welcome.md
-- architecture.md
+- authentication.md
 
-[Infrastructure]
-- network.md
-- compute.md
-- data.md
-
-[Operations]
-- monitoring.md
-- incident-response.md
+[API reference]
+- resources.md
+- errors.md
+- rate-limits.md
